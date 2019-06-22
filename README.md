@@ -6,14 +6,12 @@
 - implementation of parameter filtering and binding with request
 - code registration simple and supports multiple ways of registration
 
-1、 directory structure description
+### directory structure description
 
 - ginrpc/base/common.go Base Library
 - ginrpc/base/api/context.go customize context content
 - Supporting Automatic Detection of Parameters binding:"required"  [validator](go-playground/validator.v8)
 - Support RPC automatic mapping
-
-2、API interface description
 
 ### Support three of interface modes
 
