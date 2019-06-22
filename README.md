@@ -18,8 +18,9 @@
 - func(*gin.Context) //gin Primitive interface
 - func(*api.Context) //Custom context type
 - func(*api.Context,req) //Custom context type,Request parameters with req
-     func(*gin.Context,*req)
-     ...... other
+  func(*api.Context,req)
+  func(*gin.Context,*req)
+  func(*gin.Context,req)
 
 
 ### Sample code

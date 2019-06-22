@@ -1,24 +1,19 @@
 ## golang gin 参数自动绑定工具
 - 基于 [go-gin](https://github.com/gin-gonic/gin) 的 json restful 风格的golang基础库
-- 自带请求参数过滤及绑定实现
+- 自带请求参数过滤及绑定实现 binding:"required"  [validator](go-playground/validator.v8)
 - 代码注册简单且支持多种注册方式
-
-1、 目录结构说明
-
-- ginrpc/base/common.go 基础库
-- ginrpc/base/api/context.go 自定义context内容
-- 支持参数自动检测 binding:"required"  [validator](go-playground/validator.v8)
 - 支持rpc自动映射
 
-2、api接口说明
+## api接口说明
 
 ### 支持3种接口模式
 
 - func(*gin.Context) //gogin 原始接口
 - func(*api.Context) //自定义的context类型
 - func(*api.Context,req) //自定义的context类型,带request 请求参数
-     func(*gin.Context,*req)
-     ...... 等接口模式
+  func(*api.Context,req)
+  func(*gin.Context,*req)
+  func(*gin.Context,req)
 
 
 ### 示例代码
