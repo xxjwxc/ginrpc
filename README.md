@@ -21,7 +21,7 @@
 
 ### 示例代码
 
-   ```
+   ```go
    type ReqTest struct {
         Access_token string `json:"access_token"`                 //access_token
         UserName     string `json:"user_name" binding:"required"` //用户名
