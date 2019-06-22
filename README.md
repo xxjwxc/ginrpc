@@ -1,5 +1,7 @@
-# go-restful
+## golang gin 参数自动绑定工具
 - 基于 [go-gin](https://github.com/gin-gonic/gin) 的 json restful 风格的golang基础库
+- 自带请求参数过滤及绑定实现
+- 代码注册简单且支持多种注册方式
 
 1、 目录结构说明
 
