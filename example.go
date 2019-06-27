@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xie1xiao1jun/ginrpc/base"
-	"github.com/xie1xiao1jun/ginrpc/base/api"
+	"github.com/xxjwxc/ginrpc/base"
+	"github.com/xxjwxc/ginrpc/base/api"
 )
 
 type ReqTest struct {

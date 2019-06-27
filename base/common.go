@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/xie1xiao1jun/ginrpc/base/api"
+	"github.com/xxjwxc/ginrpc/base/api"
 
 	"github.com/gin-gonic/gin"
 )
