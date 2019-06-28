@@ -1,10 +1,11 @@
 package base
 
 import (
-	"errors"
 	"net/http"
 	"reflect"
 	"runtime"
+
+	"github.com/xxjwxc/public/errors"
 
 	"github.com/xxjwxc/ginrpc/base/api"
 
