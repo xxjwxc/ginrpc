@@ -26,39 +26,63 @@
 ### Sample code
 
    ```go
-   type ReqTest struct {
-        Access_token string `json:"access_token"`                 
-        UserName     string `json:"username" binding:"required"` 
-        Password     string `json:"password"`                    
-    }
+   
+   package main
 
-    //TestFun1 gin Primitive interface
-    func TestFun1(c *gin.Context) {
-    }
+import (
+	"fmt"
+	"net/http"
 
-    //TestFun2 Custom context type
-    func TestFun2(c *api.Context) {
-    }
+	"github.com/gin-gonic/gin"
+	"github.com/xxjwxc/ginrpc/base"
+	"github.com/xxjwxc/ginrpc/base/api"
+)
 
-    //TestFun3 Custom context type,Request parameters with req
-    func TestFun3(c *api.Context, req *ReqTest) {
-        fmt.Println(req)
-    }
+type ReqTest struct {
+	Access_token string `json:"access_token"`                 //access_token
+	UserName     string `json:"user_name" binding:"required"` //用户名
+	Password     string `json:"password"`                     //新密码
+}
 
-    //TestFun4 other style
-    func TestFun4(c *gin.Context, req ReqTest) {
-        fmt.Println(req)
-    }
+//TestFun1 gin 默认的函数回调地址
+func TestFun1(c *gin.Context) {
+	fmt.Println(c.Params)
+	c.String(200, "ok")
+}
 
-    func main() {
-        router := gin.Default()
-        router.GET("/test1", base.GetHandlerFunc(TestFun1))
-        router.POST("/test2", base.GetHandlerFunc(TestFun2))
-        router.POST("/test3", base.GetHandlerFunc(TestFun3))
-        router.POST("/test4", base.GetHandlerFunc(TestFun4))
+//TestFun2 自定义context的函数回调地址
+func TestFun2(c *api.Context) {
+	fmt.Println(c.Params)
+	c.JSON(http.StatusOK, "ok")
+}
 
-        router.Run(":8080")
-    }
+//TestFun3 带自定义context跟已解析的req参数回调方式
+func TestFun3(c *api.Context, req *ReqTest) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+	c.JSON(http.StatusOK, "ok")
+}
+
+//TestFun3 带自定义context跟已解析的req参数回调方式
+func TestFun4(c *gin.Context, req ReqTest) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+
+	c.JSON(http.StatusOK, req)
+}
+
+func main() {
+	router := gin.Default()
+	router.POST("/test1", base.GetHandlerFunc(TestFun1))
+	router.POST("/test2", base.GetHandlerFunc(TestFun2))
+	router.POST("/test3", base.GetHandlerFunc(TestFun3))
+	router.POST("/test4", base.GetHandlerFunc(TestFun4))
+
+	router.Run(":8080")
+}
+
+   
+   
    ```
 
  - curl
