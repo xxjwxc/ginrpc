@@ -43,7 +43,7 @@ func TestFun4(c *gin.Context, req ReqTest) {
 	c.JSON(http.StatusOK, req)
 }
 
-func main() {
+func Call() {
 	router := gin.Default()
 	router.POST("/test1", base.GetHandlerFunc(TestFun1))
 	router.POST("/test2", base.GetHandlerFunc(TestFun2))
@@ -51,4 +51,7 @@ func main() {
 	router.POST("/test4", base.GetHandlerFunc(TestFun4))
 
 	router.Run(":8080")
+}
+func main() {
+	Call()
 }
