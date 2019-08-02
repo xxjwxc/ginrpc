@@ -8,16 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//Context .
 type Context struct {
 	*gin.Context
 }
 
-//
+//Newctx .
 func Newctx(c *gin.Context) *Context {
 	return &Context{c}
 }
 
-//获取版本号
+//GetVersion 获取版本号
 func (c *Context) GetVersion() string {
 	return c.Param("version")
 }

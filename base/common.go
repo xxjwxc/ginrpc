@@ -23,7 +23,7 @@ func _fun1(*gin.Context)              {}
 func _fun2(*api.Context)              {}
 func _fun3(*api.Context, interface{}) {}
 
-//
+//GetHandlerFunc .
 func GetHandlerFunc(handlerFunc interface{}) gin.HandlerFunc {
 	//gin默认方法
 	if reflect.TypeOf(handlerFunc) == reflect.TypeOf(_fun1) {

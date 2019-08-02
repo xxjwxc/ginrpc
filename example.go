@@ -9,10 +9,11 @@ import (
 	"github.com/xxjwxc/ginrpc/base/api"
 )
 
+//ReqTest .
 type ReqTest struct {
-	Access_token string `json:"access_token"`                 //access_token
-	UserName     string `json:"user_name" binding:"required"` //用户名
-	Password     string `json:"password"`                     //新密码
+	AccessToken string `json:"access_token"`                 //access_token
+	UserName    string `json:"user_name" binding:"required"` //用户名
+	Password    string `json:"password"`                     //新密码
 }
 
 //TestFun1 gin 默认的函数回调地址
@@ -34,7 +35,7 @@ func TestFun3(c *api.Context, req *ReqTest) {
 	c.JSON(http.StatusOK, "ok")
 }
 
-//TestFun3 带自定义context跟已解析的req参数回调方式
+//TestFun4 带自定义context跟已解析的req参数回调方式
 func TestFun4(c *gin.Context, req ReqTest) {
 	fmt.Println(c.Params)
 	fmt.Println(req)
