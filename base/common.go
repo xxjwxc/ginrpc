@@ -24,9 +24,9 @@ func _fun2(*api.Context)              {}
 func _fun3(*api.Context, interface{}) {}
 
 // GetHandlerFunc Get and filter the parameters to be bound
-// Support three types of interfaces
-// func(*gin.Context) gogin raw interface
-// func(*Context) Custom context type
+// Support three types of interfaces:
+// func(*gin.Context) gogin raw interface.
+// func(*Context) Custom context type.
 // func(*Context,req) Custom context type with request request request parameters
 func GetHandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取并过滤要绑定的参数
 	// gin default method
