@@ -1,26 +1,23 @@
+// Package api The next version of the underlying category will support automatic parsing of a single struct.
 package api
 
-/*
-* 基础类目 下一个版本将支持 单个struct 自动解析。
- */
+// 基础类目 下一个版本将支持 单个struct 自动解析。
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
-//Context .
-type Context struct {
+// Context Wrapping gin context to custom context
+type Context struct { // 包装gin的上下文到自定义context
 	*gin.Context
 }
 
-//Newctx .
-func Newctx(c *gin.Context) *Context {
+// Newctx Create a new custom context
+func Newctx(c *gin.Context) *Context { // 新建一个自定义context
 	return &Context{c}
 }
 
-//GetVersion 获取版本号
-func (c *Context) GetVersion() string {
+// GetVersion get version on req ruter
+func (c *Context) GetVersion() string { // 获取版本号
 	return c.Param("version")
 }
-
-//获取用户信息

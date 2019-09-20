@@ -9,11 +9,11 @@ import (
 	"github.com/xxjwxc/ginrpc/base/api"
 )
 
-//ReqTest .
+// ReqTest req test
 type ReqTest struct {
-	AccessToken string `json:"access_token"`                 //access_token
-	UserName    string `json:"user_name" binding:"required"` //用户名
-	Password    string `json:"password"`                     //新密码
+	AccessToken string `json:"access_token"`                 // access_token
+	UserName    string `json:"user_name" binding:"required"` // user name
+	Password    string `json:"password"`                     // password
 }
 
 func TestFun(t *testing.T) {

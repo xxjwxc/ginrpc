@@ -9,34 +9,34 @@ import (
 	"github.com/xxjwxc/ginrpc/base/api"
 )
 
-//ReqTest .
+// ReqTest test req
 type ReqTest struct {
-	AccessToken string `json:"access_token"`                 //access_token
-	UserName    string `json:"user_name" binding:"required"` //用户名
-	Password    string `json:"password"`                     //新密码
+	AccessToken string `json:"access_token"`                 // access_token
+	UserName    string `json:"user_name" binding:"required"` // user name
+	Password    string `json:"password"`                     // password
 }
 
-//TestFun1 gin 默认的函数回调地址
-func TestFun1(c *gin.Context) {
+// TestFun1 Default function callback address on gin
+func TestFun1(c *gin.Context) { // gin 默认的函数回调地址
 	fmt.Println(c.Params)
 	c.String(200, "ok")
 }
 
-//TestFun2 自定义context的函数回调地址
-func TestFun2(c *api.Context) {
+// TestFun2 Customize the function callback address of context
+func TestFun2(c *api.Context) { // 自定义context的函数回调地址
 	fmt.Println(c.Params)
 	c.JSON(http.StatusOK, "ok")
 }
 
-//TestFun3 带自定义context跟已解析的req参数回调方式
-func TestFun3(c *api.Context, req *ReqTest) {
+// TestFun3 Callback with custom context and parsed req parameters
+func TestFun3(c *api.Context, req *ReqTest) { // 带自定义context跟已解析的req参数回调方式
 	fmt.Println(c.Params)
 	fmt.Println(req)
 	c.JSON(http.StatusOK, "ok")
 }
 
-//TestFun4 带自定义context跟已解析的req参数回调方式
-func TestFun4(c *gin.Context, req ReqTest) {
+// TestFun4 Callback with custom context and parsed req parameters
+func TestFun4(c *gin.Context, req ReqTest) { // 带自定义context跟已解析的req参数回调方式
 	fmt.Println(c.Params)
 	fmt.Println(req)
 
