@@ -14,9 +14,9 @@ import (
 
 /*
  Description: Support three types of interfaces
- func(*gin.Context) //gogin raw interface
- func(*Context) // Custom context type
- func(*Context,req) // Custom context type with request request request parameters
+ func(*gin.Context) gogin raw interface
+ func(*Context)  Custom context type
+ func(*Context,req)  Custom context type with request request request parameters
 */
 
 func _fun1(*gin.Context)              {}
@@ -24,35 +24,31 @@ func _fun2(*api.Context)              {}
 func _fun3(*api.Context, interface{}) {}
 
 // GetHandlerFunc Get and filter the parameters to be bound
-// Support three types of interfaces:
-// func(*gin.Context) gogin raw interface.
-// func(*Context) Custom context type.
-// func(*Context,req) Custom context type with request request request parameters
 func GetHandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取并过滤要绑定的参数
 	// gin default method
 	if reflect.TypeOf(handlerFunc) == reflect.TypeOf(_fun1) {
-		return handlerFunc.(func(*gin.Context)) // add func wrapper calls before and after .可以添加func 包装调用前后
+		return handlerFunc.(func(*gin.Context))
 	}
 
-	// Customized context.自定义的context
+	// Customized context . 自定义的context
 	if reflect.TypeOf(handlerFunc) == reflect.TypeOf(_fun2) {
 		method := reflect.ValueOf(handlerFunc)
 		return func(c *gin.Context) {
-			method.Call([]reflect.Value{reflect.ValueOf(api.Newctx(c))})
+			method.Call([]reflect.Value{reflect.ValueOf(api.NewCtx(c))})
 		}
 	}
 
-	// Custom context type with request request request parameters.自定义的context类型,带request 请求参数
+	// Custom context type with request parameters .自定义的context类型,带request 请求参数
 	call, err := getCallFunc3(handlerFunc)
 
-	if err != nil { // Direct reporting error.直接
+	if err != nil { // Direct reporting error.
 		panic(err)
 	}
 
 	return call
 }
 
-// Custom context type with request request request parameters
+// Custom context type with request parameters
 func getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
 	typ := reflect.ValueOf(handlerFunc).Type()
 	if typ.NumIn() != 2 { // Parameter checking 参数检查
@@ -98,13 +94,12 @@ func getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
 		if reqIsGinCtx {
 			method.Call([]reflect.Value{reflect.ValueOf(c), req})
 		} else {
-			method.Call([]reflect.Value{reflect.ValueOf(api.Newctx(c)), req})
+			method.Call([]reflect.Value{reflect.ValueOf(api.NewCtx(c)), req})
 		}
 
 	}, nil
 }
 
-// bind .绑定
 func unmarshal(c *gin.Context, v interface{}) error {
 	return c.ShouldBind(v)
 }
