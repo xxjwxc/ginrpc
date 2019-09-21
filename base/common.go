@@ -25,7 +25,7 @@ func _fun3(*api.Context, interface{}) {}
 
 // GetHandlerFunc Get and filter the parameters to be bound
 func GetHandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取并过滤要绑定的参数
-	// gin default method
+	// go-gin default method
 	if reflect.TypeOf(handlerFunc) == reflect.TypeOf(_fun1) {
 		return handlerFunc.(func(*gin.Context))
 	}
