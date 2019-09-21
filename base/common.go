@@ -14,7 +14,7 @@ import (
 
 /*
  Description: Support three types of interfaces
- func(*gin.Context) gogin raw interface
+ func(*gin.Context) go-gin raw interface
  func(*Context)  Custom context type
  func(*Context,req)  Custom context type with request request request parameters
 */
