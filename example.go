@@ -35,8 +35,8 @@ func TestFun3(c *api.Context, req *ReqTest) { // 带自定义context跟已解析
 	c.JSON(http.StatusOK, "ok")
 }
 
-// TestFun4 Callback with custom context and parsed req parameters
-func TestFun4(c *gin.Context, req ReqTest) { // 带自定义context跟已解析的req参数回调方式
+// TestFun4 Callback with go-gin context and parsed req parameters
+func TestFun4(c *gin.Context, req ReqTest) { // 带默认context跟已解析的req参数回调方式
 	fmt.Println(c.Params)
 	fmt.Println(req)
 
