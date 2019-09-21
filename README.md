@@ -40,30 +40,30 @@ import (
 
 type ReqTest struct {
 	Access_token string `json:"access_token"`                 //access_token
-	UserName     string `json:"user_name" binding:"required"` //用户名
-	Password     string `json:"password"`                     //新密码
+	UserName     string `json:"user_name" binding:"required"` 
+	Password     string `json:"password"`                     
 }
 
-//TestFun1 gin 默认的函数回调地址
+// TestFun1 go-gin default function callback address
 func TestFun1(c *gin.Context) {
 	fmt.Println(c.Params)
 	c.String(200, "ok")
 }
 
-//TestFun2 自定义context的函数回调地址
+// TestFun2 Customize the function callback address of context
 func TestFun2(c *api.Context) {
 	fmt.Println(c.Params)
 	c.JSON(http.StatusOK, "ok")
 }
 
-//TestFun3 带自定义context跟已解析的req参数回调方式
+// TestFun3 Callback with custom context and parsed req parameters
 func TestFun3(c *api.Context, req *ReqTest) {
 	fmt.Println(c.Params)
 	fmt.Println(req)
 	c.JSON(http.StatusOK, "ok")
 }
 
-//TestFun3 带自定义context跟已解析的req参数回调方式
+// TestFun4 Callback with go-gin context and parsed req parameters
 func TestFun4(c *gin.Context, req ReqTest) {
 	fmt.Println(c.Params)
 	fmt.Println(req)
