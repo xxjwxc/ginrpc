@@ -15,8 +15,8 @@ func TestMain(t *testing.T) {
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 
 	TestFun1(c)
-	TestFun2(api.Newctx(c))
-	TestFun3(api.Newctx(c), &ReqTest{})
+	TestFun2(api.NewCtx(c))
+	TestFun3(api.NewCtx(c), &ReqTest{})
 	TestFun4(c, ReqTest{})
 
 	router := gin.Default()
