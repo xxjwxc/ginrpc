@@ -1,5 +1,7 @@
 ## Automatic parameter binding tool base on [go-gin](https://github.com/gin-gonic/gin)
 
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
+
 [中文文档](README_cn.md)
 
 - base on [go-gin](https://github.com/gin-gonic/gin) on json restful style 
