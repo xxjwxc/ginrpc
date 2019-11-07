@@ -17,23 +17,24 @@ type ReqTest struct {
 }
 
 func TestFun(t *testing.T) {
-	GetHandlerFunc(func(c *gin.Context) {
+	base := NewBase()
+	base.GetHandlerFunc(func(c *gin.Context) {
 		fmt.Println(c.Params)
 		c.String(200, "ok")
 	})
 
-	GetHandlerFunc(func(c *api.Context) {
+	base.GetHandlerFunc(func(c *api.Context) {
 		fmt.Println(c.Params)
 		c.JSON(http.StatusOK, "ok")
 	})
 
-	GetHandlerFunc(func(c *api.Context, req *ReqTest) {
+	base.GetHandlerFunc(func(c *api.Context, req *ReqTest) {
 		fmt.Println(c.Params)
 		fmt.Println(req)
 		c.JSON(http.StatusOK, "ok")
 	})
 
-	GetHandlerFunc(func(c *gin.Context, req ReqTest) {
+	base.GetHandlerFunc(func(c *gin.Context, req ReqTest) {
 		fmt.Println(c.Params)
 		fmt.Println(req)
 

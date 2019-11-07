@@ -5,51 +5,22 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/xxjwxc/public/errors"
-
-	"github.com/xxjwxc/ginrpc/base/api"
-
 	"github.com/gin-gonic/gin"
+	"github.com/xxjwxc/public/errors"
 )
 
-/*
- Description: Support three types of interfaces
- func(*gin.Context) go-gin raw interface
- func(*Context)  Custom context type
- func(*Context,req)  Custom context type with request request request parameters
-*/
-
-func _fun1(*gin.Context)              {}
-func _fun2(*api.Context)              {}
-func _fun3(*api.Context, interface{}) {}
-
-// GetHandlerFunc Get and filter the parameters to be bound
-func GetHandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取并过滤要绑定的参数
-	// go-gin default method
-	if reflect.TypeOf(handlerFunc) == reflect.TypeOf(_fun1) {
-		return handlerFunc.(func(*gin.Context))
-	}
-
-	// Customized context . 自定义的context
-	if reflect.TypeOf(handlerFunc) == reflect.TypeOf(_fun2) {
-		method := reflect.ValueOf(handlerFunc)
-		return func(c *gin.Context) {
-			method.Call([]reflect.Value{reflect.ValueOf(api.NewCtx(c))})
-		}
-	}
-
-	// Custom context type with request parameters .自定义的context类型,带request 请求参数
-	call, err := getCallFunc3(handlerFunc)
-
-	if err != nil { // Direct reporting error.
-		panic(err)
-	}
-
-	return call
-}
+// func (b *base) initAPI() {
+// 	typ := reflect.ValueOf(b.iFunc3).Type()
+// 	if typ.NumIn() != 2 { // Parameter checking 参数检查
+// 		panic(errors.New("method " + runtime.FuncForPC(
+// 			reflect.ValueOf(b.iFunc3).Pointer()).Name() + " not support!"))
+// 	}
+// 	b.apiFun = api.NewAPIFunc
+// 	b.apiType = typ.In(0)
+// }
 
 // Custom context type with request parameters
-func getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
+func (b *base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
 	typ := reflect.ValueOf(handlerFunc).Type()
 	if typ.NumIn() != 2 { // Parameter checking 参数检查
 		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " not support!")
@@ -59,8 +30,10 @@ func getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
 	ctxType = typ.In(0)
 	reqType = typ.In(1)
 	reqIsGinCtx := false
+	// ctxType != reflect.TypeOf(gin.Context{}) &&
+	// ctxType != reflect.Indirect(reflect.ValueOf(b.iAPIType)).Type()
 	if ctxType != reflect.TypeOf(&gin.Context{}) &&
-		ctxType != reflect.TypeOf(&api.Context{}) {
+		ctxType != b.apiType {
 		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " first parm not support!")
 	}
 
@@ -82,7 +55,7 @@ func getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
 			req = reflect.New(reqType.Elem())
 		}
 
-		if err := unmarshal(c, req.Interface()); err != nil { // Return error message.返回错误信息
+		if err := b.unmarshal(c, req.Interface()); err != nil { // Return error message.返回错误信息
 			c.JSON(http.StatusBadRequest, gin.H{"state": false, "code": 1001, "error": err.Error()})
 			return
 		}
@@ -94,12 +67,23 @@ func getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
 		if reqIsGinCtx {
 			method.Call([]reflect.Value{reflect.ValueOf(c), req})
 		} else {
-			method.Call([]reflect.Value{reflect.ValueOf(api.NewCtx(c)), req})
+			method.Call([]reflect.Value{reflect.ValueOf(b.apiFun(c)), req})
 		}
 
 	}, nil
 }
 
-func unmarshal(c *gin.Context, v interface{}) error {
+func (b *base) unmarshal(c *gin.Context, v interface{}) error {
 	return c.ShouldBind(v)
+}
+
+func (b *base) tagOn(n int) {
+	b.tag |= n
+}
+
+func (b *base) checkTag() bool {
+	if (b.tag&1) == 1 || ((b.tag<<1)&1) == 1 {
+		return (b.tag & 0x11) == 1
+	}
+	return true
 }
