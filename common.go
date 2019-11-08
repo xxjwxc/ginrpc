@@ -1,4 +1,4 @@
-package base
+package ginrpc
 
 import (
 	"net/http"
@@ -26,19 +26,17 @@ func (b *base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error)
 		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " not support!")
 	}
 
-	var ctxType, reqType reflect.Type
-	ctxType = typ.In(0)
-	reqType = typ.In(1)
-	reqIsGinCtx := false
-	// ctxType != reflect.TypeOf(gin.Context{}) &&
-	// ctxType != reflect.Indirect(reflect.ValueOf(b.iAPIType)).Type()
-	if ctxType != reflect.TypeOf(&gin.Context{}) &&
-		ctxType != b.apiType {
-		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " first parm not support!")
-	}
+	ctxType, reqType := typ.In(0), typ.In(1)
 
+	reqIsGinCtx := false
 	if ctxType == reflect.TypeOf(&gin.Context{}) {
 		reqIsGinCtx = true
+	}
+
+	// ctxType != reflect.TypeOf(gin.Context{}) &&
+	// ctxType != reflect.Indirect(reflect.ValueOf(b.iAPIType)).Type()
+	if !reqIsGinCtx && ctxType != b.apiType {
+		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " first parm not support!")
 	}
 
 	reqIsValue := true
@@ -82,8 +80,8 @@ func (b *base) tagOn(n int) {
 }
 
 func (b *base) checkTag() bool {
-	if (b.tag&1) == 1 || ((b.tag<<1)&1) == 1 {
-		return (b.tag & 0x11) == 1
+	if b.tag > 0 {
+		return b.tag == 3
 	}
 	return true
 }

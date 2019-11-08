@@ -1,10 +1,10 @@
-package base
+package ginrpc
 
 import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xxjwxc/ginrpc/base/api"
+	"github.com/xxjwxc/ginrpc/api"
 	"github.com/xxjwxc/public/errors"
 )
 
@@ -13,6 +13,7 @@ type base struct {
 	tag     int
 	apiFun  NewAPIFunc
 	apiType reflect.Type
+	router  *gin.Engine
 }
 
 // Default new op obj
@@ -27,7 +28,7 @@ func Default() *base {
 // GetHandlerFunc Get and filter the parameters to be bound
 func (b *base) GetHandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取并过滤要绑定的参数
 	if !b.checkTag() {
-		panic(errors.New("method:Model and UseCustomCtx must use together"))
+		panic(errors.New("method:Model and NewCustomCtxCall must use together"))
 	}
 
 	typ := reflect.ValueOf(handlerFunc).Type()
@@ -59,8 +60,19 @@ func (b *base) GetHandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获�
 
 // CheckHandlerFunc Judge whether to match rules
 func (b *base) CheckHandlerFunc(handlerFunc interface{}) bool { // 判断是否匹配规则
-	if reflect.TypeOf(handlerFunc) == reflect.TypeOf(_fun1) {
-		return true
+	typ := reflect.ValueOf(handlerFunc).Type()
+	if typ.NumIn() == 1 || typ.NumIn() == 2 { // Parameter checking 参数检查
+		ctxType := typ.In(0)
+
+		// go-gin default method
+		if ctxType == reflect.TypeOf(&gin.Context{}) {
+			return true
+		}
+
+		// Customized context . 自定义的context
+		if ctxType == b.apiType {
+			return true
+		}
 	}
 
 	return false

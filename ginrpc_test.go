@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xxjwxc/ginrpc/base"
-	"github.com/xxjwxc/ginrpc/base/api"
+	"github.com/xxjwxc/ginrpc/api"
 )
 
 func TestModelFunc(t *testing.T) {
-	base := base.Default()
+	base := Default()
 	base.Model(&api.Context{}).NewCustomCtxCall(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
 	})
@@ -26,7 +25,7 @@ func TestModelFunc(t *testing.T) {
 }
 
 // ReqTest test req
-type ReqTest struct {
+type ReqTest1 struct {
 	AccessToken string `json:"access_token"`                 // access_token
 	UserName    string `json:"user_name" binding:"required"` // user name
 	Password    string `json:"password"`                     // password
@@ -45,14 +44,14 @@ func testFun2(c *api.Context) { // 自定义context的函数回调地址
 }
 
 // testFun3 Callback with custom context and parsed req parameters
-func testFun3(c *api.Context, req *ReqTest) { // 带自定义context跟已解析的req参数回调方式
+func testFun3(c *api.Context, req *ReqTest1) { // 带自定义context跟已解析的req参数回调方式
 	fmt.Println(c.Params)
 	fmt.Println(req)
 	c.JSON(http.StatusOK, "ok")
 }
 
 // testFun4 Callback with go-gin context and parsed req parameters
-func testFun4(c *gin.Context, req ReqTest) { // 带默认context跟已解析的req参数回调方式
+func testFun4(c *gin.Context, req ReqTest1) { // 带默认context跟已解析的req参数回调方式
 	fmt.Println(c.Params)
 	fmt.Println(req)
 

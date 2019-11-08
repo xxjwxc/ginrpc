@@ -1,8 +1,8 @@
-package base
+package ginrpc
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/xxjwxc/ginrpc/base/api"
+	"github.com/xxjwxc/ginrpc/api"
 )
 
 /*
