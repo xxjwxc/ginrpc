@@ -20,7 +20,7 @@ import (
 // }
 
 // Custom context type with request parameters
-func (b *base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
+func (b *_Base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
 	typ := reflect.ValueOf(handlerFunc).Type()
 	if typ.NumIn() != 2 { // Parameter checking 参数检查
 		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " not support!")
@@ -71,15 +71,15 @@ func (b *base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error)
 	}, nil
 }
 
-func (b *base) unmarshal(c *gin.Context, v interface{}) error {
+func (b *_Base) unmarshal(c *gin.Context, v interface{}) error {
 	return c.ShouldBind(v)
 }
 
-func (b *base) tagOn(n int) {
+func (b *_Base) tagOn(n int) {
 	b.tag |= n
 }
 
-func (b *base) checkTag() bool {
+func (b *_Base) checkTag() bool {
 	if b.tag > 0 {
 		return b.tag == 3
 	}

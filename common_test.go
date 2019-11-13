@@ -18,23 +18,23 @@ type ReqTest struct {
 
 func TestFun(t *testing.T) {
 	ginrpc := Default()
-	ginrpc.GetHandlerFunc(func(c *gin.Context) {
+	ginrpc.HandlerFunc(func(c *gin.Context) {
 		fmt.Println(c.Params)
 		c.String(200, "ok")
 	})
 
-	ginrpc.GetHandlerFunc(func(c *api.Context) {
+	ginrpc.HandlerFunc(func(c *api.Context) {
 		fmt.Println(c.Params)
 		c.JSON(http.StatusOK, "ok")
 	})
 
-	ginrpc.GetHandlerFunc(func(c *api.Context, req *ReqTest) {
+	ginrpc.HandlerFunc(func(c *api.Context, req *ReqTest) {
 		fmt.Println(c.Params)
 		fmt.Println(req)
 		c.JSON(http.StatusOK, "ok")
 	})
 
-	ginrpc.GetHandlerFunc(func(c *gin.Context, req ReqTest) {
+	ginrpc.HandlerFunc(func(c *gin.Context, req ReqTest) {
 		fmt.Println(c.Params)
 		fmt.Println(req)
 

@@ -10,16 +10,20 @@ import (
 )
 
 func TestModelFunc(t *testing.T) {
-	base := Default()
-	base.Model(&api.Context{}).NewCustomCtxCall(func(c *gin.Context) interface{} {
-		return api.NewCtx(c)
-	})
+	// base := Default()
+	// base.Model(&api.Context{}).NewCustomCtxCall(func(c *gin.Context) interface{} {
+	// 	return api.NewCtx(c)
+	// })
+	base := New(&api.Context{},func(c *gin.Context) interface{} {
+		 	return api.NewCtx(c)
+		 })
 
 	router := gin.Default()
-	router.POST("/test1", base.GetHandlerFunc(testFun1))
-	router.POST("/test2", base.GetHandlerFunc(testFun2))
-	router.POST("/test3", base.GetHandlerFunc(testFun3))
-	router.POST("/test4", base.GetHandlerFunc(testFun4))
+	base.RegisterHandlerHandlerFunc()
+	router.POST("/test1", base.HandlerFunc(testFun1))
+	router.POST("/test2", base.HandlerFunc(testFun2))
+	router.POST("/test3", base.HandlerFunc(testFun3))
+	router.POST("/test4", base.HandlerFunc(testFun4))
 
 	router.Run(":8080")
 }
