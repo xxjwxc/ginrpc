@@ -18,7 +18,7 @@ type _Base struct {
 }
 
 // Default new op obj
-func (*_Base)Default() *_Base {
+func Default() *_Base {
 	b := new(_Base)
 	b.apiFun = api.NewAPIFunc
 	b.apiType = reflect.TypeOf(&api.Context{})
@@ -27,7 +27,7 @@ func (*_Base)Default() *_Base {
 }
 
 // New new customized base 
-func (*_Base)New(ty interface{},middleware NewAPIFunc) *_Base{
+func New(ty interface{},middleware NewAPIFunc) *_Base{
 	b := new(_Base)
 	b.Model(ty).NewCustomCtxCall(middleware)
 
@@ -55,7 +55,7 @@ func (b *_Base) CheckHandlerFunc(handlerFunc interface{}) bool { // 判断是否
 	return false
 }
 
-func (b *_Base) RegisterHandlerHandlerFunc(router *gin.Engine,httpMethod []string,relativePath string, handlerFuncs ...interface{}) errors{
+func (b *_Base) RegisterHandlerHandlerFunc(router *gin.Engine,httpMethod []string,relativePath string, handlerFuncs ...interface{}) error{
 	list:=make([]gin.HandlerFunc,0,len(handlerFuncs)) 
 	for _, call:= range handlerFuncs{
 		list = append(list,b.HandlerFunc(call))

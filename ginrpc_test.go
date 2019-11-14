@@ -19,7 +19,7 @@ func TestModelFunc(t *testing.T) {
 		 })
 
 	router := gin.Default()
-	base.RegisterHandlerHandlerFunc()
+	base.RegisterHandlerHandlerFunc(router,[]string{"post","get"},"/test",testFun1)
 	router.POST("/test1", base.HandlerFunc(testFun1))
 	router.POST("/test2", base.HandlerFunc(testFun2))
 	router.POST("/test3", base.HandlerFunc(testFun3))
