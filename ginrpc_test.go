@@ -9,17 +9,42 @@ import (
 	"github.com/xxjwxc/ginrpc/api"
 )
 
+type Hello struct {
+}
+
+// @router /block [post]
+func (s *Hello) HelloS(c *api.Context, req *ReqTest1) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+	c.JSON(http.StatusOK, "ok")
+}
+
+func (s *Hello) HelloS2(c *api.Context, req *ReqTest1) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+	c.JSON(http.StatusOK, "ok")
+}
+
+func TestModelObj(t *testing.T) {
+	base := New(&api.Context{}, func(c *gin.Context) interface{} {
+		return api.NewCtx(c)
+	})
+
+	router := gin.Default()
+	base.Register(router, new(Hello))
+}
+
 func TestModelFunc(t *testing.T) {
 	// base := Default()
 	// base.Model(&api.Context{}).NewCustomCtxCall(func(c *gin.Context) interface{} {
 	// 	return api.NewCtx(c)
 	// })
-	base := New(&api.Context{},func(c *gin.Context) interface{} {
-		 	return api.NewCtx(c)
-		 })
+	base := New(&api.Context{}, func(c *gin.Context) interface{} {
+		return api.NewCtx(c)
+	})
 
 	router := gin.Default()
-	base.RegisterHandlerHandlerFunc(router,[]string{"post","get"},"/test",testFun1)
+	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", testFun1)
 	router.POST("/test1", base.HandlerFunc(testFun1))
 	router.POST("/test2", base.HandlerFunc(testFun2))
 	router.POST("/test3", base.HandlerFunc(testFun3))

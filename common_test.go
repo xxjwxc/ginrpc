@@ -40,4 +40,8 @@ func TestFun(t *testing.T) {
 
 		c.JSON(http.StatusOK, req)
 	})
+
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	router.Run(":8080")
 }
