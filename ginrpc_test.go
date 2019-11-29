@@ -26,20 +26,20 @@ func (s *Hello) HelloS2(c *api.Context, req *ReqTest1) {
 }
 
 func TestModelObj(t *testing.T) {
-	base := New(&api.Context{}, func(c *gin.Context) interface{} {
+	base := New(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
 	})
 
 	router := gin.Default()
-	base.Register(router, new(Hello))
+	base.Register(router, "/", new(Hello))
 }
 
 func TestModelFunc(t *testing.T) {
 	// base := Default()
-	// base.Model(&api.Context{}).NewCustomCtxCall(func(c *gin.Context) interface{} {
+	// base.Model(func(c *gin.Context) interface{} {
 	// 	return api.NewCtx(c)
 	// })
-	base := New(&api.Context{}, func(c *gin.Context) interface{} {
+	base := New(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
 	})
 

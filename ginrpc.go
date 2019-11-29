@@ -3,9 +3,7 @@ package ginrpc
 import (
 	"fmt"
 	"reflect"
-	"runtime"
 	"strings"
-	"unsafe"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc/api"
@@ -14,82 +12,78 @@ import (
 
 // _Base base struct
 type _Base struct {
-	tag     int
+	// tag     int
 	apiFun  NewAPIFunc
 	apiType reflect.Type
 	router  *gin.Engine
+	prePath string
 }
 
 // Default new op obj
 func Default() *_Base {
 	b := new(_Base)
-	b.apiFun = api.NewAPIFunc
-	b.apiType = reflect.TypeOf(&api.Context{})
+	b.Model(api.NewAPIFunc)
 
 	return b
 }
 
 // New new customized base
-func New(ty interface{}, middleware NewAPIFunc) *_Base {
+func New(middleware NewAPIFunc) *_Base {
 	b := new(_Base)
-	b.Model(ty).NewCustomCtxCall(middleware)
+	b.Model(middleware)
 
 	return b
 }
 
-// CheckHandlerFunc Judge whether to match rules
-func (b *_Base) CheckHandlerFunc(handlerFunc interface{}) bool { // 判断是否匹配规则
-	typ := reflect.ValueOf(handlerFunc).Type()
-	if typ.NumIn() == 1 || typ.NumIn() == 2 { // Parameter checking 参数检查
-		ctxType := typ.In(0)
-
-		// go-gin default method
-		if ctxType == reflect.TypeOf(&gin.Context{}) {
-			return true
-		}
-
-		// Customized context . 自定义的context
-		if ctxType == b.apiType {
-			return true
-		}
+// Model use custom context
+func (b *_Base) Model(middleware NewAPIFunc) *_Base {
+	if middleware == nil { // default middleware
+		middleware = api.NewAPIFunc
 	}
 
-	return false
+	b.apiFun = middleware // save callback
+
+	rt := reflect.TypeOf(middleware(&gin.Context{}))
+	if rt == nil || rt.Kind() != reflect.Ptr {
+		panic("need pointer")
+	}
+	b.apiType = rt
+
+	return b
 }
 
-func call() {
-	fmt.Println(runtime.Caller(2))
+// Group creates a new router group. You should add all the routes that have common middlewares or the same path prefix.
+// For example, all the routes that use a common middleware for authorization could be grouped.
+// Last : you can us gin.Group replace this also (添加路由前缀,也可以调用gin.Group来设置)
+func (b *_Base) Group(prepath string) *_Base {
+	b.prePath = prepath
+	return b
 }
 
-// Register Registered by struct object
+// Register Registered by struct object,[prepath + bojname.]
 func (b *_Base) Register(router *gin.Engine, cList ...interface{}) error {
-	call()
+	modPkg, modFile := getModuleInfo()
+	fmt.Println(modPkg, modFile)
 
 	for _, c := range cList {
 		reflectVal := reflect.ValueOf(c)
-
 		t := reflect.Indirect(reflectVal).Type()
-		fmt.Println(runtime.FuncForPC((uintptr)(unsafe.Pointer(b))).Name())
+		objPkg := t.PkgPath()
+		objName := t.Name()
 
-		fmt.Println(t)
+		fmt.Println(objPkg, objName)
+
 		typ := reflect.TypeOf(c)
-		hdlr := reflect.ValueOf(c)
-		name := reflect.Indirect(hdlr).Type().Name()
-		vtyp := reflect.Indirect(hdlr).Type()
-		fmt.Println(vtyp.PkgPath())
-		fmt.Println(reflect.Indirect(reflect.ValueOf(b)).Type().PkgPath())
-
 		for m := 0; m < typ.NumMethod(); m++ {
 			fmt.Println(typ.Method(m))
 			fmt.Println(typ.Method(m).PkgPath)
-			fmt.Println(name)
 		}
 	}
 
 	return nil
 }
 
-// RegisterHandlerFunc Multiple registration methods
+// RegisterHandlerFunc Multiple registration methods.获取并过滤要绑定的参数
 func (b *_Base) RegisterHandlerFunc(router *gin.Engine, httpMethod []string, relativePath string, handlerFuncs ...interface{}) error {
 	list := make([]gin.HandlerFunc, 0, len(handlerFuncs))
 	for _, call := range handlerFuncs {
@@ -132,10 +126,6 @@ func (b *_Base) RegisterHandlerFunc(router *gin.Engine, httpMethod []string, rel
 
 // HandlerFunc Get and filter the parameters to be bound
 func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取并过滤要绑定的参数
-	if !b.checkTag() {
-		panic(errors.New("method:Model and NewCustomCtxCall must use together"))
-	}
-
 	typ := reflect.ValueOf(handlerFunc).Type()
 	if typ.NumIn() == 1 { // Parameter checking 参数检查
 		ctxType := typ.In(0)
@@ -163,21 +153,21 @@ func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取
 	return call
 }
 
-// NewCustomCtx use custom context
-func (b *_Base) NewCustomCtxCall(middleware NewAPIFunc) *_Base { // 使用自定义 context
-	b.apiFun = middleware
-	b.tagOn(2)
-	return b
-}
+// CheckHandlerFunc Judge whether to match rules
+func (b *_Base) CheckHandlerFunc(handlerFunc interface{}) bool { // 判断是否匹配规则
+	typ := reflect.ValueOf(handlerFunc).Type()
+	if typ.NumIn() == 1 || typ.NumIn() == 2 { // Parameter checking 参数检查
+		ctxType := typ.In(0)
 
-// Model use custom model
-func (b *_Base) Model(ty interface{}) *_Base {
-	rt := reflect.TypeOf(ty)
-	if rt == nil || rt.Kind() != reflect.Ptr {
-		panic("need pointer")
+		// go-gin default method
+		if ctxType == reflect.TypeOf(&gin.Context{}) {
+			return true
+		}
+
+		// Customized context . 自定义的context
+		if ctxType == b.apiType {
+			return true
+		}
 	}
-	b.tagOn(1)
-	b.apiType = rt
-
-	return b
+	return false
 }

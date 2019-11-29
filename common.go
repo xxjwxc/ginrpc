@@ -75,13 +75,13 @@ func (b *_Base) unmarshal(c *gin.Context, v interface{}) error {
 	return c.ShouldBind(v)
 }
 
-func (b *_Base) tagOn(n int) {
-	b.tag |= n
-}
+// func (b *_Base) tagOn(n int) {
+// 	b.tag |= n
+// }
 
-func (b *_Base) checkTag() bool {
-	if b.tag > 0 {
-		return b.tag == 3
-	}
-	return true
-}
+// func (b *_Base) checkTag() bool {
+// 	if b.tag > 0 {
+// 		return b.tag == 3
+// 	}
+// 	return true
+// }
