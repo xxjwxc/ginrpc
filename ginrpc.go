@@ -2,6 +2,8 @@ package ginrpc
 
 import (
 	"fmt"
+	"go/ast"
+	"go/token"
 	"reflect"
 	"strings"
 
@@ -70,8 +72,15 @@ func (b *_Base) Register(router *gin.Engine, cList ...interface{}) error {
 		t := reflect.Indirect(reflectVal).Type()
 		objPkg := t.PkgPath()
 		objName := t.Name()
-
 		fmt.Println(objPkg, objName)
+
+		// find path
+		objFile := evalSymlinks(modPkg, modFile, objPkg)
+		fmt.Println(objFile)
+
+		astPkgs, b := getAstPkgs(objPkg, objFile, objName)
+		ast.Print(token.NewFileSet(), astPkgs)
+		fmt.Println(b)
 
 		typ := reflect.TypeOf(c)
 		for m := 0; m < typ.NumMethod(); m++ {
