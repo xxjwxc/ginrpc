@@ -1,23 +1,41 @@
 package ginrpc
 
 import (
+	"fmt"
+	"go/ast"
 	"net/http"
 	"reflect"
+	"regexp"
 	"runtime"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/public/errors"
+	"github.com/xxjwxc/public/mybigcamel"
 )
 
-// func (b *base) initAPI() {
-// 	typ := reflect.ValueOf(b.iFunc3).Type()
-// 	if typ.NumIn() != 2 { // Parameter checking 参数检查
-// 		panic(errors.New("method " + runtime.FuncForPC(
-// 			reflect.ValueOf(b.iFunc3).Pointer()).Name() + " not support!"))
-// 	}
-// 	b.apiFun = api.NewAPIFunc
-// 	b.apiType = typ.In(0)
-// }
+// checkHandlerFunc Judge whether to match rules
+func (b *_Base) checkHandlerFunc(typ reflect.Type, isObj bool) (int, bool) { // 判断是否匹配规则,返回参数个数
+	offset := 0
+	if isObj {
+		offset = 1
+	}
+	num := typ.NumIn() - offset
+	if num == 1 || num == 2 { // Parameter checking 参数检查
+		ctxType := typ.In(0 + offset)
+
+		// go-gin default method
+		if ctxType == reflect.TypeOf(&gin.Context{}) {
+			return num, true
+		}
+
+		// Customized context . 自定义的context
+		if ctxType == b.apiType {
+			return num, true
+		}
+	}
+	return num, false
+}
 
 // Custom context type with request parameters
 func (b *_Base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
@@ -75,13 +93,108 @@ func (b *_Base) unmarshal(c *gin.Context, v interface{}) error {
 	return c.ShouldBind(v)
 }
 
-// func (b *_Base) tagOn(n int) {
-// 	b.tag |= n
-// }
+var routeRegex = regexp.MustCompile(`@router\s+(\S+)(?:\s+\[(\S+)\])?`)
 
-// func (b *_Base) checkTag() bool {
-// 	if b.tag > 0 {
-// 		return b.tag == 3
-// 	}
-// 	return true
-// }
+func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, num int) []genComment {
+	var gcs []genComment
+	if f.Doc != nil {
+		for _, c := range f.Doc.List {
+			gc := genComment{}
+			t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
+			if strings.HasPrefix(t, "@router") {
+				t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
+				matches := routeRegex.FindStringSubmatch(t)
+				if len(matches) == 3 {
+					gc.routerPath = matches[1]
+					methods := matches[2]
+					if methods == "" {
+						gc.methods = []string{"get"}
+					} else {
+						gc.methods = strings.Split(methods, ",")
+					}
+					gcs = append(gcs, gc)
+				} else {
+					// return nil, errors.New("Router information is missing")
+				}
+			}
+		}
+	}
+
+	//defalt
+	if len(gcs) == 0 {
+		gc := genComment{}
+		gc.methods = []string{"get"}
+		if num == 2 { // parm 2 , post default
+			gc.methods = []string{"post"}
+		}
+
+		if b.isBigCamel { // big camel style.大驼峰
+			gc.routerPath = objName + "." + objFunc
+		} else {
+			gc.routerPath = mybigcamel.UnMarshal(objName) + "." + mybigcamel.UnMarshal(objFunc)
+		}
+		gcs = append(gcs, gc)
+	}
+
+	return gcs
+}
+
+// Register Registered by struct object,[prepath + bojname.]
+func (b *_Base) register(router *gin.Engine, cList ...interface{}) error {
+	modPkg, modFile := getModuleInfo()
+
+	for _, c := range cList {
+		refVal := reflect.ValueOf(c)
+		t := reflect.Indirect(refVal).Type()
+		objPkg := t.PkgPath()
+		objName := t.Name()
+		fmt.Println(objPkg, objName)
+
+		// find path
+		objFile := evalSymlinks(modPkg, modFile, objPkg)
+		fmt.Println(objFile)
+
+		astPkgs, _b := getAstPkgs(objPkg, objFile) // get ast trees.
+		if _b {
+			refTyp := reflect.TypeOf(c)
+			funMp := make(map[string]*ast.FuncDecl, refTyp.NumMethod())
+
+			// find all exported func of sturct objName
+			for _, fl := range astPkgs.Files {
+				for _, d := range fl.Decls {
+					switch specDecl := d.(type) {
+					case *ast.FuncDecl:
+						if specDecl.Recv != nil {
+							if exp, ok := specDecl.Recv.List[0].Type.(*ast.StarExpr); ok { // Check that the type is correct first beforing throwing to parser
+								if strings.Compare(fmt.Sprint(exp.X), objName) == 0 { // is the same struct
+									funMp[specDecl.Name.String()] = specDecl // catch
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// end
+			// ast.Print(token.NewFileSet(), astPkgs)
+			// fmt.Println(b)
+
+			// Install the methods
+			for m := 0; m < refTyp.NumMethod(); m++ {
+				method := refTyp.Method(m)
+				num, _b := b.checkHandlerFunc(method.Type /*.Interface()*/, true)
+				if _b {
+					if sdl, ok := funMp[method.Name]; ok {
+						gcs := b.parserComments(sdl, objName, method.Name, num)
+						for _, gc := range gcs {
+							checkOnceAdd(objName+"."+method.Name, gc.routerPath, gc.methods)
+						}
+					}
+				}
+			}
+		}
+
+	}
+
+	return nil
+}

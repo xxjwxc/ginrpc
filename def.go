@@ -18,3 +18,20 @@ func _fun3(*api.Context, interface{}) {}
 
 // NewAPIFunc Custom context support
 type NewAPIFunc func(*gin.Context) interface{}
+
+// store the comment for the controller method. 生成注解路由
+type genComment struct {
+	routerPath string
+	methods    []string
+}
+
+// router style list.路由规则列表
+type genRouterInfo struct {
+	genComment
+	handFunName string
+}
+
+// // router style list.路由规则列表
+// type genRouterList struct {
+// 	list []genRouterInfo
+// }

@@ -1,9 +1,6 @@
 package ginrpc
 
 import (
-	"fmt"
-	"go/ast"
-	"go/token"
 	"reflect"
 	"strings"
 
@@ -15,10 +12,11 @@ import (
 // _Base base struct
 type _Base struct {
 	// tag     int
-	apiFun  NewAPIFunc
-	apiType reflect.Type
-	router  *gin.Engine
-	prePath string
+	apiFun     NewAPIFunc
+	apiType    reflect.Type
+	router     *gin.Engine
+	prePath    string
+	isBigCamel bool // big camel style.大驼峰命名规则
 }
 
 // Default new op obj
@@ -64,32 +62,7 @@ func (b *_Base) Group(prepath string) *_Base {
 
 // Register Registered by struct object,[prepath + bojname.]
 func (b *_Base) Register(router *gin.Engine, cList ...interface{}) error {
-	modPkg, modFile := getModuleInfo()
-	fmt.Println(modPkg, modFile)
-
-	for _, c := range cList {
-		reflectVal := reflect.ValueOf(c)
-		t := reflect.Indirect(reflectVal).Type()
-		objPkg := t.PkgPath()
-		objName := t.Name()
-		fmt.Println(objPkg, objName)
-
-		// find path
-		objFile := evalSymlinks(modPkg, modFile, objPkg)
-		fmt.Println(objFile)
-
-		astPkgs, b := getAstPkgs(objPkg, objFile, objName)
-		ast.Print(token.NewFileSet(), astPkgs)
-		fmt.Println(b)
-
-		typ := reflect.TypeOf(c)
-		for m := 0; m < typ.NumMethod(); m++ {
-			fmt.Println(typ.Method(m))
-			fmt.Println(typ.Method(m).PkgPath)
-		}
-	}
-
-	return nil
+	return b.register(router, cList...)
 }
 
 // RegisterHandlerFunc Multiple registration methods.获取并过滤要绑定的参数
@@ -163,20 +136,7 @@ func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取
 }
 
 // CheckHandlerFunc Judge whether to match rules
-func (b *_Base) CheckHandlerFunc(handlerFunc interface{}) bool { // 判断是否匹配规则
+func (b *_Base) CheckHandlerFunc(handlerFunc interface{}) (int, bool) { // 判断是否匹配规则,返回参数个数
 	typ := reflect.ValueOf(handlerFunc).Type()
-	if typ.NumIn() == 1 || typ.NumIn() == 2 { // Parameter checking 参数检查
-		ctxType := typ.In(0)
-
-		// go-gin default method
-		if ctxType == reflect.TypeOf(&gin.Context{}) {
-			return true
-		}
-
-		// Customized context . 自定义的context
-		if ctxType == b.apiType {
-			return true
-		}
-	}
-	return false
+	return b.checkHandlerFunc(typ, false)
 }

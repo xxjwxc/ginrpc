@@ -68,8 +68,8 @@ func evalSymlinks(modPkg, modFile, objPkg string) string {
 	panic(errors.Errorf("can not eval pkg:[%v] must include [%v]", objPkg, modPkg))
 }
 
-// getAstPkgs Parsing source file ast structure (with objname restriction).解析源文件ast结构(带objName限制)
-func getAstPkgs(objPkg, objFile, objName string) (*ast.Package, bool) {
+// getAstPkgs Parsing source file ast structure (with main restriction).解析源文件ast结构(带 main 限制)
+func getAstPkgs(objPkg, objFile string) (*ast.Package, bool) {
 	fileSet := token.NewFileSet()
 	astPkgs, err := parser.ParseDir(fileSet, objFile, func(info os.FileInfo) bool {
 		name := info.Name()
@@ -91,7 +91,7 @@ func getAstPkgs(objPkg, objFile, objName string) (*ast.Package, bool) {
 		dirs := tools.GetPathDirs(objFile) // get all of dir
 		for _, dir := range dirs {
 			if !strings.HasPrefix(dir, ".") {
-				pkg, b := getAstPkgs(objPkg, objFile+"/"+dir, objName)
+				pkg, b := getAstPkgs(objPkg, objFile+"/"+dir)
 				if b {
 					return pkg, true
 				}

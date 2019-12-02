@@ -25,6 +25,12 @@ func (s *Hello) HelloS2(c *api.Context, req *ReqTest1) {
 	c.JSON(http.StatusOK, "ok")
 }
 
+func (s *Hello) helloS3(c *api.Context, req *ReqTest1) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+	c.JSON(http.StatusOK, "ok")
+}
+
 // ReqTest test req
 type ReqTest1 struct {
 	AccessToken string `json:"access_token"`                 // access_token
@@ -71,5 +77,5 @@ func main() {
 	})
 
 	router := gin.Default()
-	base.Register(router, new(Hello), new(api.Hello))
+	base.Register(router, new(Hello)) //, new(api.Hello))
 }
