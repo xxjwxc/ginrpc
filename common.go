@@ -37,14 +37,23 @@ func (b *_Base) checkHandlerFunc(typ reflect.Type, isObj bool) (int, bool) { // 
 	return num, false
 }
 
+// func (b *_Base) handlerFunc(typ reflect.Type, tvl, obj reflect.Value) gin.HandlerFunc { // 获取并过滤要绑定的参数
+// }
+
 // Custom context type with request parameters
-func (b *_Base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error) {
-	typ := reflect.ValueOf(handlerFunc).Type()
-	if typ.NumIn() != 2 { // Parameter checking 参数检查
-		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " not support!")
+func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) {
+	offset := 0
+	if len(tvls) > 0 {
+		offset = 1
 	}
 
-	ctxType, reqType := typ.In(0), typ.In(1)
+	tvl := tvls[0]
+	typ := tvl.Type()
+	if typ.NumIn() != (2 + offset) { // Parameter checking 参数检查
+		return nil, errors.New("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " not support!")
+	}
+
+	ctxType, reqType := typ.In(0+offset), typ.In(1+offset)
 
 	reqIsGinCtx := false
 	if ctxType == reflect.TypeOf(&gin.Context{}) {
@@ -54,36 +63,29 @@ func (b *_Base) getCallFunc3(handlerFunc interface{}) (func(*gin.Context), error
 	// ctxType != reflect.TypeOf(gin.Context{}) &&
 	// ctxType != reflect.Indirect(reflect.ValueOf(b.iAPIType)).Type()
 	if !reqIsGinCtx && ctxType != b.apiType {
-		return nil, errors.New("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " first parm not support!")
+		return nil, errors.New("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " first parm not support!")
 	}
 
-	reqIsValue := true
-	if reqType.Kind() == reflect.Ptr {
-		reqIsValue = false
+	// reqIsValue := true
+	// if reqType.Kind() == reflect.Ptr {
+	// 	reqIsValue = false
+	// }
+	apiFun := func(c *gin.Context) interface{} { return c }
+	if !reqIsGinCtx {
+		apiFun = b.apiFun
 	}
 
-	method := reflect.ValueOf(handlerFunc)
 	return func(c *gin.Context) {
-		var req reflect.Value
-		if reqIsValue {
-			req = reflect.New(reqType)
-		} else {
-			req = reflect.New(reqType.Elem())
-		}
-
+		req := reflect.New(reqType)
 		if err := b.unmarshal(c, req.Interface()); err != nil { // Return error message.返回错误信息
 			c.JSON(http.StatusBadRequest, gin.H{"state": false, "code": 1001, "error": err.Error()})
 			return
 		}
 
-		if reqIsValue {
-			req = req.Elem()
-		}
-
-		if reqIsGinCtx {
-			method.Call([]reflect.Value{reflect.ValueOf(c), req})
+		if offset > 0 {
+			tvl.Call([]reflect.Value{tvls[1], reflect.ValueOf(apiFun(c)), req.Elem()})
 		} else {
-			method.Call([]reflect.Value{reflect.ValueOf(b.apiFun(c)), req})
+			tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req.Elem()})
 		}
 
 	}, nil

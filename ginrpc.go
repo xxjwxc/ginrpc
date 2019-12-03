@@ -127,7 +127,7 @@ func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取
 	}
 
 	// Custom context type with request parameters .自定义的context类型,带request 请求参数
-	call, err := b.getCallFunc3(handlerFunc)
+	call, err := b.getCallFunc3(reflect.ValueOf(handlerFunc))
 	if err != nil { // Direct reporting error.
 		panic(err)
 	}
