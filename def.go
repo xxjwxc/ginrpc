@@ -21,17 +21,35 @@ type NewAPIFunc func(*gin.Context) interface{}
 
 // store the comment for the controller method. 生成注解路由
 type genComment struct {
-	routerPath string
-	methods    []string
+	RouterPath string
+	Methods    []string
 }
 
 // router style list.路由规则列表
 type genRouterInfo struct {
 	genComment
-	handFunName string
+	HandFunName string
+}
+
+type genInfo struct {
+	List []genRouterInfo
+	Tm   int64 //genout time
 }
 
 // // router style list.路由规则列表
 // type genRouterList struct {
 // 	list []genRouterInfo
 // }
+
+var genTemp string = `
+package {{.PkgName}}
+
+import (
+	"github.com/xxjwxc/ginrpc"
+)
+
+func init() {
+	ginrpc.SetVersion({{.Tm}})
+	{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.RouterPath}}", []string{ {{GetStringList .Methods}} })
+	{{end}} }
+`

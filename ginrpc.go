@@ -2,6 +2,7 @@ package ginrpc
 
 import (
 	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -12,11 +13,12 @@ import (
 // _Base base struct
 type _Base struct {
 	// tag     int
+	isBigCamel bool // big camel style.大驼峰命名规则
 	apiFun     NewAPIFunc
 	apiType    reflect.Type
 	router     *gin.Engine
-	prePath    string
-	isBigCamel bool // big camel style.大驼峰命名规则
+	groupPath  string // group path.添加路由前缀
+	outPath    string // output path.输出目录
 }
 
 // Default new op obj
@@ -56,13 +58,18 @@ func (b *_Base) Model(middleware NewAPIFunc) *_Base {
 // For example, all the routes that use a common middleware for authorization could be grouped.
 // Last : you can us gin.Group replace this also (添加路由前缀,也可以调用gin.Group来设置)
 func (b *_Base) Group(prepath string) *_Base {
-	b.prePath = prepath
+	prepath = strings.Replace(prepath, "\\", "/", -1)
+	if !strings.HasSuffix(prepath, "/") {
+		prepath += "/"
+	}
+	b.groupPath = prepath
 	return b
 }
 
 // Register Registered by struct object,[prepath + bojname.]
 func (b *_Base) Register(router *gin.Engine, cList ...interface{}) error {
-	return b.register(router, cList...)
+	b.tryGenRegister(router, cList...)
+	return nil
 }
 
 // RegisterHandlerFunc Multiple registration methods.获取并过滤要绑定的参数
@@ -124,6 +131,8 @@ func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取
 				method.Call([]reflect.Value{reflect.ValueOf(b.apiFun(c))})
 			}
 		}
+
+		panic("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " not support!")
 	}
 
 	// Custom context type with request parameters .自定义的context类型,带request 请求参数

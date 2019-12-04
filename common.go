@@ -37,13 +37,38 @@ func (b *_Base) checkHandlerFunc(typ reflect.Type, isObj bool) (int, bool) { // 
 	return num, false
 }
 
-// func (b *_Base) handlerFunc(typ reflect.Type, tvl, obj reflect.Value) gin.HandlerFunc { // 获取并过滤要绑定的参数
-// }
+// HandlerFunc Get and filter the parameters to be bound (object call type)
+func (b *_Base) handlerFuncObj(tvl, obj reflect.Value) gin.HandlerFunc { // 获取并过滤要绑定的参数(obj 对象类型)
+	typ := tvl.Type()
+	if typ.NumIn() == 1 { // Parameter checking 参数检查
+		ctxType := typ.In(0)
+
+		// go-gin default method
+		apiFun := func(c *gin.Context) interface{} { return c }
+		if ctxType == b.apiType { // Customized context . 自定义的context
+			apiFun = b.apiFun
+		} else if !(ctxType == reflect.TypeOf(&gin.Context{})) {
+			panic("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " not support!")
+		}
+
+		return func(c *gin.Context) {
+			tvl.Call([]reflect.Value{obj, reflect.ValueOf(apiFun(c))})
+		}
+	}
+
+	// Custom context type with request parameters .自定义的context类型,带request 请求参数
+	call, err := b.getCallFunc3(tvl, obj)
+	if err != nil { // Direct reporting error.
+		panic(err)
+	}
+
+	return call
+}
 
 // Custom context type with request parameters
 func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) {
 	offset := 0
-	if len(tvls) > 0 {
+	if len(tvls) > 1 {
 		offset = 1
 	}
 
@@ -87,7 +112,6 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 		} else {
 			tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req.Elem()})
 		}
-
 	}, nil
 }
 
@@ -107,12 +131,12 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, num int
 				t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
 				matches := routeRegex.FindStringSubmatch(t)
 				if len(matches) == 3 {
-					gc.routerPath = matches[1]
+					gc.RouterPath = matches[1]
 					methods := matches[2]
 					if methods == "" {
-						gc.methods = []string{"get"}
+						gc.Methods = []string{"get"}
 					} else {
-						gc.methods = strings.Split(methods, ",")
+						gc.Methods = strings.Split(methods, ",")
 					}
 					gcs = append(gcs, gc)
 				} else {
@@ -125,15 +149,15 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, num int
 	//defalt
 	if len(gcs) == 0 {
 		gc := genComment{}
-		gc.methods = []string{"get"}
+		gc.Methods = []string{"get"}
 		if num == 2 { // parm 2 , post default
-			gc.methods = []string{"post"}
+			gc.Methods = []string{"post"}
 		}
 
 		if b.isBigCamel { // big camel style.大驼峰
-			gc.routerPath = objName + "." + objFunc
+			gc.RouterPath = objName + "." + objFunc
 		} else {
-			gc.routerPath = mybigcamel.UnMarshal(objName) + "." + mybigcamel.UnMarshal(objFunc)
+			gc.RouterPath = mybigcamel.UnMarshal(objName) + "." + mybigcamel.UnMarshal(objFunc)
 		}
 		gcs = append(gcs, gc)
 	}
@@ -141,8 +165,8 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, num int
 	return gcs
 }
 
-// Register Registered by struct object,[prepath + bojname.]
-func (b *_Base) register(router *gin.Engine, cList ...interface{}) error {
+// tryGenRegister Registered by struct object,[prepath + bojname.]
+func (b *_Base) tryGenRegister(router *gin.Engine, cList ...interface{}) bool {
 	modPkg, modFile := getModuleInfo()
 
 	for _, c := range cList {
@@ -189,14 +213,14 @@ func (b *_Base) register(router *gin.Engine, cList ...interface{}) error {
 					if sdl, ok := funMp[method.Name]; ok {
 						gcs := b.parserComments(sdl, objName, method.Name, num)
 						for _, gc := range gcs {
-							checkOnceAdd(objName+"."+method.Name, gc.routerPath, gc.methods)
+							checkOnceAdd(objName+"."+method.Name, gc.RouterPath, gc.Methods)
 						}
 					}
 				}
 			}
 		}
-
 	}
 
-	return nil
+	genOutPut(b.outPath, modFile) // generate code
+	return true
 }

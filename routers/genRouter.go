@@ -1,5 +1,0 @@
-package routers
-
-func init() {
-
-}

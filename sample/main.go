@@ -7,12 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc"
 	"github.com/xxjwxc/ginrpc/api"
+	_ "github.com/xxjwxc/ginrpc/routers"
 )
 
 type Hello struct {
 }
 
-// @router /block [post]
+// @router /block [post,get]
 func (s *Hello) HelloS(c *api.Context, req *ReqTest1) {
 	fmt.Println(c.Params)
 	fmt.Println(req)
