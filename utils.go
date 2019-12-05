@@ -13,7 +13,7 @@ import (
 )
 
 // find and get module info , return module [ name ,path ]
-func getModuleInfo() (string, string) {
+func getModuleInfo() (string, string, bool) {
 	index := 2
 	// This is used to support third-party package encapsulation
 	// 这样做用于支持第三方包封装,(主要找到main调用者)
@@ -41,17 +41,18 @@ func getModuleInfo() (string, string) {
 				if len(list) > 0 {
 					line := strings.TrimSpace(list[0])
 					if len(line) > 0 && strings.HasPrefix(line, "module") { // find it
-						return strings.TrimSpace(line[7:]), filename
+						return strings.TrimSpace(line[7:]), filename,true
 					}
 				}
 			}
 		} else {
-			panic(errors.New("package parsing failed:can not find module file[go.mod] , golang version must up 1.11"))
+			break
+			// panic(errors.New("package parsing failed:can not find module file[go.mod] , golang version must up 1.11"))
 		}
 	}
 
 	// never reach
-	return "", ""
+	return "", "",false
 }
 
 // Return to relative path . 通过module 游标返回包相对路径

@@ -9,26 +9,10 @@ import (
 	"github.com/xxjwxc/ginrpc/api"
 )
 
-type Hello struct {
-}
-
-// @router /block [post]
-func (s *Hello) HelloS(c *api.Context, req *ReqTest1) {
-	fmt.Println(c.Params)
-	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
-}
-
-func (s *Hello) HelloS2(c *api.Context, req *ReqTest1) {
-	fmt.Println(c.Params)
-	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
-}
-
 func TestModelObj(t *testing.T) {
-	base := New(func(c *gin.Context) interface{} {
+	base := New(WithModel(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
-	})
+	}))
 
 	router := gin.Default()
 	base.Register(router, "/", new(Hello))
@@ -39,9 +23,9 @@ func TestModelFunc(t *testing.T) {
 	// base.Model(func(c *gin.Context) interface{} {
 	// 	return api.NewCtx(c)
 	// })
-	base := New(func(c *gin.Context) interface{} {
+	base := New(WithModel(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
-	})
+	}))
 
 	router := gin.Default()
 	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", testFun1)
@@ -85,4 +69,39 @@ func testFun4(c *gin.Context, req ReqTest1) { // 带默认context跟已解析的
 	fmt.Println(req)
 
 	c.JSON(http.StatusOK, req)
+}
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
+// Hello ...
+type Hello struct {
+	Index int
+}
+
+// HelloS ...
+// @router /block [post,get]
+func (s *Hello) HelloS(c *api.Context, req *ReqTest1) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+	c.JSON(http.StatusOK, "ok")
+}
+
+// HelloS2 ...
+func (s *Hello) HelloS2(c *api.Context, req *ReqTest1) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+	fmt.Println(s.Index)
+	c.JSON(http.StatusOK, "ok")
+}
+func TestObj(t *testing.T) {
+	base := New(WithCtx(func(c *gin.Context) interface{} {
+		return api.NewCtx(c)
+	}), WithDebug(true), WithGroup("xxjwxc"), WithBigCamel(true))
+
+	router := gin.Default()
+	h := new(Hello)
+	h.Index = 123
+	base.Register(router, h) //, new(api.Hello))
+	router.Run(":8080")
 }

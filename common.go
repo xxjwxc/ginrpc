@@ -149,32 +149,26 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, num int
 	//defalt
 	if len(gcs) == 0 {
 		gc := genComment{}
-		gc.Methods = []string{"get"}
-		if num == 2 { // parm 2 , post default
-			gc.Methods = []string{"post"}
-		}
-
-		if b.isBigCamel { // big camel style.大驼峰
-			gc.RouterPath = objName + "." + objFunc
-		} else {
-			gc.RouterPath = mybigcamel.UnMarshal(objName) + "." + mybigcamel.UnMarshal(objFunc)
-		}
+		gc.RouterPath, gc.Methods = b.getDefaultComments(objName, objFunc, num)
 		gcs = append(gcs, gc)
 	}
 
 	return gcs
 }
 
-// tryGenRegister Registered by struct object,[prepath + bojname.]
+// tryGenRegister gen out the Registered config info  by struct object,[prepath + bojname.]
 func (b *_Base) tryGenRegister(router *gin.Engine, cList ...interface{}) bool {
-	modPkg, modFile := getModuleInfo()
+	modPkg, modFile, isFind := getModuleInfo()
+	if !isFind {
+		return false
+	}
 
 	for _, c := range cList {
 		refVal := reflect.ValueOf(c)
 		t := reflect.Indirect(refVal).Type()
 		objPkg := t.PkgPath()
 		objName := t.Name()
-		fmt.Println(objPkg, objName)
+		// fmt.Println(objPkg, objName)
 
 		// find path
 		objFile := evalSymlinks(modPkg, modFile, objPkg)
@@ -223,4 +217,85 @@ func (b *_Base) tryGenRegister(router *gin.Engine, cList ...interface{}) bool {
 
 	genOutPut(b.outPath, modFile) // generate code
 	return true
+}
+
+// register Registered by struct object,[prepath + bojname.]
+func (b *_Base) register(router *gin.Engine, cList ...interface{}) bool {
+	mp := getInfo()
+	for _, c := range cList {
+		refTyp := reflect.TypeOf(c)
+		refVal := reflect.ValueOf(c)
+		t := reflect.Indirect(refVal).Type()
+		objName := t.Name()
+
+		// Install the methods
+		for m := 0; m < refTyp.NumMethod(); m++ {
+			method := refTyp.Method(m)
+			num, _b := b.checkHandlerFunc(method.Type /*.Interface()*/, true)
+			if _b {
+				if v, ok := mp[objName+"."+method.Name]; ok {
+					for _, v1 := range v {
+						b.registerHandlerObj(router, v1.Methods, buildRelativePath(b.groupPath, v1.RouterPath), method.Func, refVal)
+					}
+				} else { // not find using defualt case
+					routerPath, methods := b.getDefaultComments(objName, method.Name, num)
+					b.registerHandlerObj(router, methods, buildRelativePath(b.groupPath, routerPath), method.Func, refVal)
+				}
+			}
+		}
+	}
+	return true
+}
+
+func (b *_Base) getDefaultComments(objName, objFunc string, num int) (routerPath string, methods []string) {
+	methods = []string{"get"}
+	if num == 2 { // parm 2 , post default
+		methods = []string{"post"}
+	}
+
+	if b.isBigCamel { // big camel style.大驼峰
+		routerPath = objName + "." + objFunc
+	} else {
+		routerPath = mybigcamel.UnMarshal(objName) + "." + mybigcamel.UnMarshal(objFunc)
+	}
+
+	return
+}
+
+// registerHandlerObj Multiple registration methods.获取并过滤要绑定的参数
+func (b *_Base) registerHandlerObj(router *gin.Engine, httpMethod []string, relativePath string, tvl, obj reflect.Value) error {
+	call := b.handlerFuncObj(tvl, obj)
+
+	for _, v := range httpMethod {
+		// method := strings.ToUpper(v)
+		// switch method{
+		// case "ANY":
+		// 	router.Any(relativePath,list...)
+		// default:
+		// 	router.Handle(method,relativePath,list...)
+		// }
+		// or
+		switch strings.ToUpper(v) {
+		case "POST":
+			router.POST(relativePath, call)
+		case "GET":
+			router.GET(relativePath, call)
+		case "DELETE":
+			router.DELETE(relativePath, call)
+		case "PATCH":
+			router.PATCH(relativePath, call)
+		case "PUT":
+			router.PUT(relativePath, call)
+		case "OPTIONS":
+			router.OPTIONS(relativePath, call)
+		case "HEAD":
+			router.HEAD(relativePath, call)
+		case "ANY":
+			router.Any(relativePath, call)
+		default:
+			return errors.Errorf("method:[%v] not support", httpMethod)
+		}
+	}
+
+	return nil
 }

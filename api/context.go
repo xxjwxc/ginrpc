@@ -2,9 +2,6 @@
 package api
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,22 +23,6 @@ func NewCtx(c *gin.Context) *Context { // 新建一个自定义context
 // NewAPIFunc default of custom handlefunc
 func NewAPIFunc(c *gin.Context) interface{} {
 	return NewCtx(c)
-}
-
-type Hello struct {
-}
-
-// @router /block [post]
-func (s *Hello) HelloS(c *Context, req *ReqTest1) {
-	fmt.Println(c.Params)
-	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
-}
-
-func (s *Hello) HelloS2(c *Context, req *ReqTest1) {
-	fmt.Println(c.Params)
-	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
 }
 
 // ReqTest test req

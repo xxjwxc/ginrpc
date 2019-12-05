@@ -14,6 +14,7 @@ import (
 type _Base struct {
 	// tag     int
 	isBigCamel bool // big camel style.大驼峰命名规则
+	isDev      bool // if is development
 	apiFun     NewAPIFunc
 	apiType    reflect.Type
 	router     *gin.Engine
@@ -21,20 +22,68 @@ type _Base struct {
 	outPath    string // output path.输出目录
 }
 
+// Option overrides behavior of Connect.
+type Option interface {
+	apply(*_Base)
+}
+
+type optionFunc func(*_Base)
+
+func (f optionFunc) apply(o *_Base) {
+	f(o)
+}
+
+// WithCtx use custom context.设置自定义context
+func WithCtx(middleware NewAPIFunc) Option {
+	return optionFunc(func(o *_Base) {
+		o.Model(middleware)
+	})
+}
+
+// WithDebug set build is development.设置debug模式(默认debug模式)
+func WithDebug(b bool) Option {
+	return optionFunc(func(o *_Base) {
+		o.Dev(b)
+	})
+}
+
+// WithBigCamel set build is BigCamel.是否大驼峰模式
+func WithBigCamel(b bool) Option {
+	return optionFunc(func(o *_Base) {
+		o.isBigCamel = b
+	})
+}
+
+// WithGroup Add route prefix.添加路由前缀
+func WithGroup(prepath string) Option {
+	return optionFunc(func(o *_Base) {
+		o.Group(prepath)
+	})
+}
+
 // Default new op obj
 func Default() *_Base {
 	b := new(_Base)
 	b.Model(api.NewAPIFunc)
+	b.Dev(true)
 
 	return b
 }
 
 // New new customized base
-func New(middleware NewAPIFunc) *_Base {
-	b := new(_Base)
-	b.Model(middleware)
+func New(opts ...Option) *_Base {
+	b := Default() // default option
+
+	for _, o := range opts {
+		o.apply(b)
+	}
 
 	return b
+}
+
+// Dev set build is development
+func (b *_Base) Dev(isDev bool) {
+	b.isDev = isDev
 }
 
 // Model use custom context
@@ -67,9 +116,12 @@ func (b *_Base) Group(prepath string) *_Base {
 }
 
 // Register Registered by struct object,[prepath + bojname.]
-func (b *_Base) Register(router *gin.Engine, cList ...interface{}) error {
-	b.tryGenRegister(router, cList...)
-	return nil
+func (b *_Base) Register(router *gin.Engine, cList ...interface{}) bool {
+	if b.isDev {
+		b.tryGenRegister(router, cList...)
+	}
+
+	return b.register(router, cList...)
 }
 
 // RegisterHandlerFunc Multiple registration methods.获取并过滤要绑定的参数
