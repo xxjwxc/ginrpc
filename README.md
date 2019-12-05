@@ -4,6 +4,9 @@
 
 [中文文档](README_cn.md)
 
+- Support for RPC automatic mapping
+- Support object registration
+- Support annotation routing
 - base on [go-gin](https://github.com/gin-gonic/gin) on json restful style 
 - implementation of parameter filtering and binding with request
 - code registration simple and supports multiple ways of registration
