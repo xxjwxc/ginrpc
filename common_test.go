@@ -43,5 +43,5 @@ func TestFun(t *testing.T) {
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	router.Run(":8080")
+	// router.Run(":8080")
 }

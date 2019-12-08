@@ -34,7 +34,7 @@ func TestModelFunc(t *testing.T) {
 	router.POST("/test3", base.HandlerFunc(testFun3))
 	router.POST("/test4", base.HandlerFunc(testFun4))
 
-	router.Run(":8080")
+	// router.Run(":8080")
 }
 
 // ReqTest test req
@@ -103,5 +103,5 @@ func TestObj(t *testing.T) {
 	h := new(Hello)
 	h.Index = 123
 	base.Register(router, h) //, new(api.Hello))
-	router.Run(":8080")
+	// router.Run(":8080")
 }
