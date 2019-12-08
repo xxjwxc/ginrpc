@@ -1,3 +1,7 @@
+## [ginprc](https://github.com/xxjwxc/ginrpc)
+
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
+
 ## golang gin 参数自动绑定工具
 - 支持rpc自动映射
 - 支持对象注册
@@ -11,11 +15,11 @@
 
 ### 支持3种接口模式
 
-- func(*gin.Context) //gogin 原始接口
-- func(*api.Context) //自定义的context类型
+- func(*gin.Context) //go-gin 原始接口
+  func(*api.Context) //自定义的context类型
 - func(*api.Context,req) //自定义的context类型,带request 请求参数
-  func(*api.Context,req)
-  func(*gin.Context,*req)
+  func(*api.Context,*req)
+- func(*gin.Context,*req) //go-gin context类型,带request 请求参数
   func(*gin.Context,req)
 
 
@@ -24,7 +28,7 @@
 ## 初始化项目(本项目以ginweb 为名字)
 	``` go mod init ginweb ```
 
-### 代码 (详细地址：)
+### 代码 (详细地址：https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
 ```go
   package main
 
@@ -115,3 +119,40 @@ func main() {
   ```
   curl 'http://127.0.0.1:8080/test4' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
   ```
+
+### 注解路由
+
+- 1.注解路由会自动创建[mod]/routers/gen_router.go 文件 需要在调用时加：
+	```
+	_ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
+	```
+	默认也会在项目根目录生成[gen_router.data]文件(保留次文件，可以不用添加上面代码嵌入)
+- 2.注解路由调用方式：
+	```
+	base := ginrpc.New(ginrpc.WithCtx(func(c *gin.Context) interface{} {
+		return api.NewCtx(c)
+	}), ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
+	base.Register(router, new(Hello))                          // 对象注册
+	router.Run(":8080")
+	```
+	详细请看demo  [ginweb](/sample/ginweb)
+- 3.执行curl，可以自动参数绑定。直接看结果
+  ```
+  curl 'http://127.0.0.1:8080/xxjwxc/block' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
+  ```
+  ```
+  curl 'http://127.0.0.1:8080/xxjwxc/hello.hello2' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
+  ```
+- 4 参数说明
+	ginrpc.WithCtx ： 设置自定义context
+	ginrpc.WithDebug(true) : 设置debug模式
+	ginrpc.WithGroup("xxjwxc") : 添加路由前缀 (也可以使用gin.Group 分组)
+	ginrpc.WithBigCamel(true) : 设置大驼峰标准(false 为web模式，_,小写)
+
+	[更多](https://godoc.org/github.com/xxjwxc/ginrpc)
+
+### 下一步
+	1.导出api文档
+	2.导出postman测试配置
+
+### 代码地址： [ginprc](https://github.com/xxjwxc/ginrpc) 如果喜欢请给星支持
