@@ -10,7 +10,7 @@ import (
 )
 
 func TestModelObj(t *testing.T) {
-	base := New(WithModel(func(c *gin.Context) interface{} {
+	base := New(WithCtx(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
 	}))
 
@@ -23,7 +23,7 @@ func TestModelFunc(t *testing.T) {
 	// base.Model(func(c *gin.Context) interface{} {
 	// 	return api.NewCtx(c)
 	// })
-	base := New(WithModel(func(c *gin.Context) interface{} {
+	base := New(WithCtx(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
 	}))
 
