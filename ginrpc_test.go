@@ -15,7 +15,7 @@ func TestModelObj(t *testing.T) {
 	}))
 
 	router := gin.Default()
-	base.Register(router, "/", new(Hello))
+	base.Register(router, new(Hello))
 }
 
 func TestModelFunc(t *testing.T) {
