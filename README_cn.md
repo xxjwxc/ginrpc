@@ -28,7 +28,7 @@
   func(*gin.Context,req)
 
 
-### 参数自动绑定
+## 一,参数自动绑定
 
 ```go
   package main
@@ -75,12 +75,12 @@ func main() {
 
   ```
 
-### 对象注册(注解路由)
+## 对象注册(注解路由)
 
-## 初始化项目(本项目以ginweb 为名字)
+### 初始化项目(本项目以ginweb 为名字)
 	``` go mod init ginweb ```
 
-### 代码 (详细地址：https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
+### 代码 [详细地址>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
 ```go
   package main
 
@@ -133,20 +133,22 @@ func main() {
 }
    ```
 
-### 注解路由相关说明
+## 二,注解路由相关说明
 
 ```
  // @router /block [post,get]
 
+@router 标记 
+
+/block 路由
+ 
+[post,get] method 调用方式
+
  ```
 
- @router 标记 
 
- /block 路由
- 
- [post,get] method 调用方式
 
-1. 注解路由会自动创建[mod]/routers/gen_router.go 文件 需要在调用时加：
+### 1. 注解路由会自动创建[mod]/routers/gen_router.go 文件 需要在调用时加：
 
 	```
 	_ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
@@ -155,11 +157,11 @@ func main() {
 
 	默认也会在项目根目录生成[gen_router.data]文件(保留此文件，可以不用添加上面代码嵌入)
 
-2. 注解路由调用方式：
+### 2. 注解路由调用方式：
 
 	详细请看demo  [ginweb](/sample/ginweb)
 
-3. 相关参数说明
+### 3. 相关参数说明
 
 	ginrpc.WithCtx ： 设置自定义context
 
@@ -171,7 +173,7 @@ func main() {
 
 	[更多](https://godoc.org/github.com/xxjwxc/ginrpc)
 
-4. 执行curl，可以自动参数绑定。直接看结果
+### 4. 执行curl，可以自动参数绑定。直接看结果
 
   ```
   curl 'http://127.0.0.1:8080/xxjwxc/block' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
@@ -181,7 +183,7 @@ func main() {
   curl 'http://127.0.0.1:8080/xxjwxc/hello.hello2' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
   ```
 
-### 下一步
+## 下一步
 
 	1.导出api文档
 
