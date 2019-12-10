@@ -103,7 +103,6 @@ type ReqTest struct {
 
 // Hello ...
 type Hello struct {
-	Index int
 }
 
 // Hello 带注解路由(参考beego形式)
@@ -128,9 +127,7 @@ func main() {
 	}), ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
 
 	router := gin.Default()
-	h := new(Hello)
-	h.Index = 123
-	base.Register(router, h)                          // 对象注册 like(go-micro)
+	base.Register(router, new(Hello))                          // 对象注册 like(go-micro)
 	// or base.Register(router, new(Hello)) 
 	router.Run(":8080")
 }
@@ -138,32 +135,56 @@ func main() {
 
 ### 注解路由相关说明
 
-- 1.注解路由会自动创建[mod]/routers/gen_router.go 文件 需要在调用时加：
+```
+ // @router /block [post,get]
+
+ ```
+
+ @router 标记 
+
+ /block 路由
+ 
+ [post,get] method 调用方式
+
+1. 注解路由会自动创建[mod]/routers/gen_router.go 文件 需要在调用时加：
 
 	```
 	_ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
+
 	```
-	默认也会在项目根目录生成[gen_router.data]文件(保留次文件，可以不用添加上面代码嵌入)
-- 2.注解路由调用方式：
+
+	默认也会在项目根目录生成[gen_router.data]文件(保留此文件，可以不用添加上面代码嵌入)
+
+2. 注解路由调用方式：
+
 	详细请看demo  [ginweb](/sample/ginweb)
-- 3.相关参数说明
+
+3. 相关参数说明
+
 	ginrpc.WithCtx ： 设置自定义context
+
 	ginrpc.WithDebug(true) : 设置debug模式
+
 	ginrpc.WithGroup("xxjwxc") : 添加路由前缀 (也可以使用gin.Group 分组)
+
 	ginrpc.WithBigCamel(true) : 设置大驼峰标准(false 为web模式，_,小写)
 
 	[更多](https://godoc.org/github.com/xxjwxc/ginrpc)
 
-- 4.执行curl，可以自动参数绑定。直接看结果
+4. 执行curl，可以自动参数绑定。直接看结果
+
   ```
   curl 'http://127.0.0.1:8080/xxjwxc/block' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
   ```
+
   ```
   curl 'http://127.0.0.1:8080/xxjwxc/hello.hello2' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
   ```
-  
+
 ### 下一步
+
 	1.导出api文档
+
 	2.导出postman测试配置
 
 ### 代码地址： [ginprc](https://github.com/xxjwxc/ginrpc) 如果喜欢请给星支持
