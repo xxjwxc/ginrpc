@@ -31,14 +31,12 @@
 ## 一,参数自动绑定
 
 ```go
-  package main
+
+package main
 
 import (
 	"fmt"
 	"net/http"
-
-	_ "ginweb/routers" // debug模式需要添加[mod]/routers 注册注解路由
-
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc"
 	"github.com/xxjwxc/ginrpc/api"
@@ -82,7 +80,8 @@ func main() {
 
 ### 代码 [详细地址>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
 ```go
-  package main
+
+package main
 
 import (
 	"fmt"
@@ -109,14 +108,12 @@ type Hello struct {
 // @router /block [post,get]
 func (s *Hello) Hello(c *api.Context, req *ReqTest) {
 	fmt.Println(req)
-	fmt.Println(s.Index)
 	c.JSON(http.StatusOK, "ok")
 }
 
 // Hello2 不带注解路由(参数为2默认post)
 func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
 	fmt.Println(req)
-	fmt.Println(s.Index)
 	c.JSON(http.StatusOK, "ok")
 }
 
