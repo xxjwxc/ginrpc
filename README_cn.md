@@ -138,13 +138,11 @@ func main() {
 ```
  // @router /block [post,get]
 
-@router 标记 
-
-/block 路由
- 
-[post,get] method 调用方式
+@router 标记  /block 路由 [post,get] method 调用方式
 
  ```
+
+ #### 说明:如果对象函数中不加注解路由，系统会默认添加注解路由。post方式：带req(2个参数(ctx,req))，get方式为一个参数(ctx)
 
 
 
