@@ -6,7 +6,7 @@
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
 
-## golang gin 参数自动绑定工具
+## Golang gin automatic parameter binding
 
 - Support for RPC automatic mapping
 - Support object registration
