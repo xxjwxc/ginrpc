@@ -55,6 +55,8 @@ func main() {
 
    ```
 
+[更多>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
+
 - curl
 
   ```
@@ -68,7 +70,7 @@ func main() {
 
 	``` go mod init ginweb ```
 
-### 代码 [详细地址>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
+### 代码 
 
 ```go
 package main
@@ -114,6 +116,8 @@ func main() {
 }
    ```
 
+[更多>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
+
 ### 执行curl，可以自动参数绑定。直接看结果
 
   ```
@@ -154,7 +158,7 @@ func main() {
 
 	ginrpc.WithBigCamel(true) : 设置大驼峰标准(false 为web模式，_,小写)
 
-	[更多](https://godoc.org/github.com/xxjwxc/ginrpc)
+[更多>>](https://godoc.org/github.com/xxjwxc/ginrpc)
 
 ### 2. 注解路由调用demo：[ginweb](/sample/ginweb)
 
