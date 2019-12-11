@@ -5,15 +5,9 @@
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
 ## golang gin 参数自动绑定工具
-- 支持rpc自动映射
-- 支持对象注册
-- 支持注解路由
-- 基于 [go-gin](https://github.com/gin-gonic/gin) 的 json restful 风格的golang基础库
+- 支持对象自动注册及注解路由
+- 支持参数自动绑定
 - 自带请求参数过滤及绑定实现 binding:"required"  [validator](go-playground/validator.v8)
-- 代码注册简单且支持多种注册方式
-
-
-## api接口说明
 
 ### 支持3种接口模式
 
@@ -52,9 +46,7 @@ type ReqTest struct {
 
 //TestFun4 带自定义context跟已解析的req参数回调方式
 func TestFun4(c *gin.Context, req ReqTest) {
-	fmt.Println(c.Params)
 	fmt.Println(req)
-
 	c.JSON(http.StatusOK, req)
 }
 

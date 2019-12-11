@@ -15,6 +15,11 @@ func (c *Context) GetVersion() string { // 获取版本号
 	return c.Param("version")
 }
 
+//WriteJSON 写入json对象
+func (c *Context) WriteJSON(obj interface{}) {
+	c.JSON(200, obj)
+}
+
 // NewCtx Create a new custom context
 func NewCtx(c *gin.Context) *Context { // 新建一个自定义context
 	return &Context{c}
@@ -23,11 +28,4 @@ func NewCtx(c *gin.Context) *Context { // 新建一个自定义context
 // NewAPIFunc default of custom handlefunc
 func NewAPIFunc(c *gin.Context) interface{} {
 	return NewCtx(c)
-}
-
-// ReqTest test req
-type ReqTest1 struct {
-	AccessToken string `json:"access_token"`                 // access_token
-	UserName    string `json:"user_name" binding:"required"` // user name
-	Password    string `json:"password"`                     // password
 }
