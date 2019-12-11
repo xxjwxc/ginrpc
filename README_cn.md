@@ -43,7 +43,7 @@ type ReqTest struct {
 //TestFun4 带自定义context跟已解析的req参数回调方式
 func TestFun4(c *api.Context, req ReqTest) {
 	fmt.Println(req)
-	c.WriteJSON(req)
+	c.WriteJSON(req) // 返回结果
 }
 
 func main() {
@@ -97,17 +97,17 @@ type Hello struct {
 // @router /block [post,get]
 func (s *Hello) Hello(c *api.Context, req *ReqTest) {
 	fmt.Println(req)
-	c.WriteJSON(req)
+	c.WriteJSON(req) // 返回结果
 }
 
 // Hello2 不带注解路由(参数为2默认post)
 func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
 	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
+	c.JSON(http.StatusOK, "ok") // gin 默认返回结果
 }
 
 func main() {
-	base := ginrpc.New(ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
+	base := ginrpc.New(ginrpc.WithGroup("xxjwxc"))
 	router := gin.Default()
 	base.Register(router, new(Hello)) // 对象注册 like(go-micro)
 	router.Run(":8080")
@@ -124,7 +124,7 @@ func main() {
   curl 'http://127.0.0.1:8080/xxjwxc/hello.hello2' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
   ```
 
-------------------
+------------------------------------------------------
 
 ### -注解路由相关说明
 
@@ -135,8 +135,6 @@ func main() {
  ```
 
  #### 说明:如果对象函数中不加注解路由，系统会默认添加注解路由。post方式：带req(2个参数(ctx,req))，get方式为一个参数(ctx)
-
-
 
 ### 1. 注解路由会自动创建[root]/routers/gen_router.go 文件 需要在调用时加：
 
