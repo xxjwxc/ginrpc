@@ -1,6 +1,7 @@
-## Automatic parameter binding base on [go-gin](https://github.com/gin-gonic/gin)
 
-## [中文文档](README_cn.md)
+# [中文文档](README_cn.md)
+
+## Automatic parameter binding base on [go-gin](https://github.com/gin-gonic/gin)
 
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
@@ -17,6 +18,7 @@
 ## API details
 
 ### Three interface modes are supported
+
 - func(*gin.Context) // go-gin Raw interface
 
   func(*api.Context) // Custom context type
@@ -186,4 +188,4 @@ func main() {
 
 	2. Export postman test configuration
 
-### coding address： [ginprc](https://github.com/xxjwxc/ginrpc) Please give star support
+### coding address:[ginprc](https://github.com/xxjwxc/ginrpc) Please give star support
