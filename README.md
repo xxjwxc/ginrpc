@@ -4,45 +4,41 @@
 
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
+
+## golang gin 参数自动绑定工具
+
 - Support for RPC automatic mapping
 - Support object registration
 - Support annotation routing
-- base on [go-gin](https://github.com/gin-gonic/gin) on json restful style 
+- base on [go-gin](https://github.com/gin-gonic/gin) on json restful style
 - implementation of parameter filtering and binding with request
 - code registration simple and supports multiple ways of registration
 
-### directory structure description
+## API details
 
-- ginrpc/base/common.go Base Library
-- ginrpc/base/api/context.go customize context content
-- Supporting Automatic Detection of Parameters binding:"required"  [validator](go-playground/validator.v8)
-- Support RPC automatic mapping
+### Three interface modes are supported
+- func(*gin.Context) // go-gin Raw interface
 
-### Support three of interface modes
+  func(*api.Context) // Custom context type
 
-- func(*gin.Context) //gin Primitive interface
-  func(*api.Context) //Custom context type
-- func(*api.Context,req) //Custom context type,Request parameters with req
-  func(*api.Context,req)
-- func(*gin.Context,*req)//go-gin context ,Request parameters with req
+- func(*api.Context,req) // Custom context type,with request
+
+  func(*api.Context,*req)
+
+- func(*gin.Context,*req) // go-gin context,with request
+
   func(*gin.Context,req)
 
 
-### Sample code
+## 一,Parameter auto binding
 
-## init(sample mod is ginweb )
-	``` go mod init ginweb ```
-
-### coding (detailed address：https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
 ```go
+
 package main
 
 import (
 	"fmt"
 	"net/http"
-
-	_ "ginweb/routers" // debug模式需要添加[mod]/routers 注册注解路由
-
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc"
 	"github.com/xxjwxc/ginrpc/api"
@@ -50,50 +46,11 @@ import (
 
 type ReqTest struct {
 	Access_token string `json:"access_token"`
-	UserName     string `json:"user_name" binding:"required"` // 带校验方式
+	UserName     string `json:"user_name" binding:"required"` // With verification mode.带校验方式
 	Password     string `json:"password"`
 }
 
-// Hello ...
-type Hello struct {
-	Index int
-}
-
-// Hello 带注解路由(参考beego形式)
-// @router /block [post,get]
-func (s *Hello) Hello(c *api.Context, req *ReqTest) {
-	fmt.Println(req)
-	fmt.Println(s.Index)
-	c.JSON(http.StatusOK, "ok")
-}
-
-// Hello2 不带注解路由(参数为2默认post)
-func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
-	fmt.Println(req)
-	fmt.Println(s.Index)
-	c.JSON(http.StatusOK, "ok")
-}
-
-//TestFun1 gin 默认的函数回调地址
-func TestFun1(c *gin.Context) {
-	fmt.Println(c.Params)
-	c.String(200, "ok")
-}
-
-//TestFun2 自定义context的函数回调地址
-func TestFun2(c *api.Context) {
-	fmt.Println(c.Params)
-	c.JSON(http.StatusOK, "ok")
-}
-
-//TestFun3 带自定义context跟已解析的req参数回调方式
-func TestFun3(c *api.Context, req *ReqTest) {
-	fmt.Println(c.Params)
-	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
-}
-
-//TestFun4 带自定义context跟已解析的req参数回调方式
+//TestFun4 Callback method with custom context and resolved req parameters
 func TestFun4(c *gin.Context, req ReqTest) {
 	fmt.Println(c.Params)
 	fmt.Println(req)
@@ -102,59 +59,131 @@ func TestFun4(c *gin.Context, req ReqTest) {
 }
 
 func main() {
+	base := ginrpc.New() 
+	router := gin.Default()
+	router.POST("/test4", base.HandlerFunc(TestFun4))
+	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", TestFun4) // Multiple request mode registration
+	router.Run(":8080")
+}
+
+   ```
+
+- curl
+
+  ```
+  curl 'http://127.0.0.1:8080/test4' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
+
+  ```
+
+## 二,Object registration (annotation routing)
+
+### Initialization project (this project is named after `ginweb`)
+	``` go mod init ginweb ```
+
+### coding [more>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
+```go
+
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	_ "ginweb/routers" // Debug mode requires adding [mod] / routes to register annotation routes.debug模式需要添加[mod]/routers 注册注解路由
+
+	"github.com/gin-gonic/gin"
+	"github.com/xxjwxc/ginrpc"
+	"github.com/xxjwxc/ginrpc/api"
+)
+
+type ReqTest struct {
+	Access_token string `json:"access_token"`
+	UserName     string `json:"user_name" binding:"required"` // With verification mode
+	Password     string `json:"password"`
+}
+
+// Hello ...
+type Hello struct {
+}
+
+// Hello Annotated route (bese on beego way)
+// @router /block [post,get]
+func (s *Hello) Hello(c *api.Context, req *ReqTest) {
+	fmt.Println(req)
+	c.JSON(http.StatusOK, "ok")
+}
+
+// Hello2 Route without annotation (the parameter is 2 default post)
+func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
+	fmt.Println(req)
+	c.JSON(http.StatusOK, "ok")
+}
+
+
+func main() {
 	base := ginrpc.New(ginrpc.WithCtx(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
 	}), ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
 
 	router := gin.Default()
-	h := new(Hello)
-	h.Index = 123
-	base.Register(router, h)                          // 对象注册
-	router.POST("/test1", base.HandlerFunc(TestFun1)) // 函数注册
-	router.POST("/test2", base.HandlerFunc(TestFun2))
-	router.POST("/test3", base.HandlerFunc(TestFun3))
-	router.POST("/test4", base.HandlerFunc(TestFun4))
-	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", TestFun1) // 多种请求方式注册
-
+	base.Register(router, new(Hello))                          // object register like(go-micro)
+	// or base.Register(router, new(Hello)) 
 	router.Run(":8080")
 }
    ```
 
-- curl
-  ```
-  curl 'http://127.0.0.1:8080/test4' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
-  ```
+### - Annotation routing related instructions
 
-### Annotation routing
+```
+ // @router /block [post,get]
 
-- 1.Annotation route will automatically create[mod]/routers/gen_router.go file and   which needs to be added when calling：
-	```
-	_ "[mod]/routers" // Debug mode requires adding [mod]/routes to register annotation routes
-	```
-	By default, the [gen_router. Data] file will also be generated in the root directory of the project (keep the secondary file, and you can embed it without adding the above code)
+@router tag  /block router [post,get] method 
 
-- 2.Annotation route call mode:
+ ```
+
+ #### Note: if there is no annotation route in the object function, the system will add annotation route by default. Post mode: with req (2 parameters (CTX, req)), get mode is a parameter (CTX)
+
+
+
+### 1. Annotation route will automatically create `[mod]/routes/gen_router.go` file, which needs to be added when calling:
+
 	```
-	base := ginrpc.New(ginrpc.WithCtx(func(c *gin.Context) interface{} {
-		return api.NewCtx(c)
-	}), ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
-	base.Register(router, new(Hello))                          // 对象注册
-	router.Run(":8080")
+	_ "[mod]/routers" // Debug mode requires adding [mod] / routes to register annotation routes
+
 	```
-	more demo  [ginweb](/sample/ginweb)
-- 3.Execute curl to automatically bind parameters. See the results directly
+
+	By default, the [gen_router. Data] file will also be generated in the root directory of the project (keep this file, and you can embed it without adding the above code)
+
+### 2. way of annotation route :
+
+	more to saying  [ginweb](/sample/ginweb)
+
+### 3. Parameter description
+
+	ginrpc.WithCtx ： Set custom context
+
+	ginrpc.WithDebug(true) : Set debug mode
+
+	ginrpc.WithGroup("xxjwxc") : Add routing prefix (you can also use gin. Group grouping)
+
+	ginrpc.WithBigCamel(true) : Set big camel standard (false is web mode, _, lowercase)
+
+	[more>>](https://godoc.org/github.com/xxjwxc/ginrpc)
+
+### 4. Execute curl to automatically bind parameters. See the results directly
+
   ```
   curl 'http://127.0.0.1:8080/xxjwxc/block' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
   ```
+
   ```
   curl 'http://127.0.0.1:8080/xxjwxc/hello.hello2' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
   ```
-- 4 Parameter description
-	ginrpc.WithCtx ： Set custom context
-	ginrpc.WithDebug(true) : set debug style
-	ginrpc.WithGroup("xxjwxc") : Add routing prefix (you can also use gin. Group grouping)
-	ginrpc.WithBigCamel(true) : Set big hump standard (false is web mode, _, lowercase)
 
-	[more](https://godoc.org/github.com/xxjwxc/ginrpc)
+## Next
+
+	1. Export API documents
+
+	2. Export postman test configuration
 
 ### coding address： [ginprc](https://github.com/xxjwxc/ginrpc) Please give star support
