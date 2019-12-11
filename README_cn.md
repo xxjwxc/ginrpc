@@ -17,14 +17,10 @@
 
 - func(*api.Context,req) //自定义的context类型,带request 请求参数
 
-  func(*api.Context,*req)
-
 - func(*gin.Context,*req) //go-gin context类型,带request 请求参数
 
-  func(*gin.Context,req)
 
-
-## 一,参数自动绑定
+## 1.参数自动绑定
 
 ```go
 
@@ -32,29 +28,28 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc"
 	"github.com/xxjwxc/ginrpc/api"
 )
 
 type ReqTest struct {
-	Access_token string `json:"access_token"`
-	UserName     string `json:"user_name" binding:"required"` // 带校验方式
-	Password     string `json:"password"`
+	AccessToken string `json:"access_token"`
+	UserName    string `json:"user_name" binding:"required"` // 带校验方式
+	Password    string `json:"password"`
 }
 
 //TestFun4 带自定义context跟已解析的req参数回调方式
-func TestFun4(c *gin.Context, req ReqTest) {
+func TestFun4(c *api.Context, req ReqTest) {
 	fmt.Println(req)
-	c.JSON(http.StatusOK, req)
+	c.WriteJSON(req)
 }
 
 func main() {
-	base := ginrpc.New() 
+	base := ginrpc.New()
 	router := gin.Default()
 	router.POST("/test4", base.HandlerFunc(TestFun4))
-	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", TestFun4) // 多种请求方式注册
 	router.Run(":8080")
 }
 
@@ -67,14 +62,15 @@ func main() {
 
   ```
 
-## 二,对象注册(注解路由)
+## 2.对象注册(注解路由)
 
 ### 初始化项目(本项目以ginweb 为名字)
+
 	``` go mod init ginweb ```
 
 ### 代码 [详细地址>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
-```go
 
+```go
 package main
 
 import (
@@ -89,12 +85,11 @@ import (
 )
 
 type ReqTest struct {
-	Access_token string `json:"access_token"`
-	UserName     string `json:"user_name" binding:"required"` // 带校验方式
-	Password     string `json:"password"`
+	AccessToken string `json:"access_token"`
+	UserName    string `json:"user_name" binding:"required"` // 带校验方式
+	Password    string `json:"password"`
 }
 
-// Hello ...
 type Hello struct {
 }
 
@@ -102,7 +97,7 @@ type Hello struct {
 // @router /block [post,get]
 func (s *Hello) Hello(c *api.Context, req *ReqTest) {
 	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
+	c.WriteJSON(req)
 }
 
 // Hello2 不带注解路由(参数为2默认post)
@@ -111,24 +106,30 @@ func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
 	c.JSON(http.StatusOK, "ok")
 }
 
-
 func main() {
-	base := ginrpc.New(ginrpc.WithCtx(func(c *gin.Context) interface{} {
-		return api.NewCtx(c)
-	}), ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
-
+	base := ginrpc.New(ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
 	router := gin.Default()
-	base.Register(router, new(Hello))                          // 对象注册 like(go-micro)
-	// or base.Register(router, new(Hello)) 
+	base.Register(router, new(Hello)) // 对象注册 like(go-micro)
 	router.Run(":8080")
 }
    ```
+
+### 执行curl，可以自动参数绑定。直接看结果
+
+  ```
+  curl 'http://127.0.0.1:8080/xxjwxc/block' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
+  ```
+
+  ```
+  curl 'http://127.0.0.1:8080/xxjwxc/hello.hello2' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
+  ```
+
+------------------
 
 ### -注解路由相关说明
 
 ```
  // @router /block [post,get]
-
 @router 标记  /block 路由 [post,get] method 调用方式
 
  ```
@@ -137,20 +138,15 @@ func main() {
 
 
 
-### 1. 注解路由会自动创建[mod]/routers/gen_router.go 文件 需要在调用时加：
+### 1. 注解路由会自动创建[root]/routers/gen_router.go 文件 需要在调用时加：
 
 	```
 	_ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
-
 	```
 
-	默认也会在项目根目录生成[gen_router.data]文件(保留此文件，可以不用添加上面代码嵌入)
+	默认也会在项目根目录生成 `gen_router.data` 文件(保留此文件，可以不用添加上面代码嵌入)
 
-### 2. 注解路由调用方式：
-
-	详细请看demo  [ginweb](/sample/ginweb)
-
-### 3. 相关参数说明
+### 2. 注册函数说明
 
 	ginrpc.WithCtx ： 设置自定义context
 
@@ -162,15 +158,8 @@ func main() {
 
 	[更多](https://godoc.org/github.com/xxjwxc/ginrpc)
 
-### 4. 执行curl，可以自动参数绑定。直接看结果
+### 2. 注解路由调用demo：[ginweb](/sample/ginweb)
 
-  ```
-  curl 'http://127.0.0.1:8080/xxjwxc/block' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
-  ```
-
-  ```
-  curl 'http://127.0.0.1:8080/xxjwxc/hello.hello2' -H 'Content-Type: application/json' -d '{"access_token":"111", "user_name":"222", "password":"333"}'
-  ```
 
 ## 下一步
 

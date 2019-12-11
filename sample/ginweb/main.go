@@ -11,10 +11,11 @@ import (
 	"github.com/xxjwxc/ginrpc/api"
 )
 
+// ReqTest demo struct
 type ReqTest struct {
-	Access_token string `json:"access_token"`
-	UserName     string `json:"user_name" binding:"required"` // 带校验方式
-	Password     string `json:"password"`
+	AccessToken string `json:"access_token"`
+	UserName    string `json:"user_name" binding:"required"` // 带校验方式
+	Password    string `json:"password"`
 }
 
 // Hello ...
