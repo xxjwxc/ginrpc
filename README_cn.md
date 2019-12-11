@@ -1,6 +1,6 @@
-## [ginprc](https://github.com/xxjwxc/ginrpc) 注解路由，自动参数绑定工具
+# [English](README.md)
 
-## [English]](README.md)
+## [ginprc](https://github.com/xxjwxc/ginrpc) 注解路由，自动参数绑定工具
 
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
