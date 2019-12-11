@@ -39,28 +39,23 @@ func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
 
 //TestFun1 gin 默认的函数回调地址
 func TestFun1(c *gin.Context) {
-	fmt.Println(c.Params)
 	c.String(200, "ok")
 }
 
 //TestFun2 自定义context的函数回调地址
 func TestFun2(c *api.Context) {
-	fmt.Println(c.Params)
 	c.JSON(http.StatusOK, "ok")
 }
 
 //TestFun3 带自定义context跟已解析的req参数回调方式
 func TestFun3(c *api.Context, req *ReqTest) {
-	fmt.Println(c.Params)
 	fmt.Println(req)
-	c.JSON(http.StatusOK, "ok")
+	c.WriteJSON(req)
 }
 
 //TestFun4 带自定义context跟已解析的req参数回调方式
 func TestFun4(c *gin.Context, req ReqTest) {
-	fmt.Println(c.Params)
 	fmt.Println(req)
-
 	c.JSON(http.StatusOK, req)
 }
 
