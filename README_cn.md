@@ -162,7 +162,10 @@ func main() {
 
 ### 2. 注解路由调用demo：[ginweb](/sample/ginweb)
 
+## Stargazers over time
 
+[![Stargazers over time](https://starchart.cc/xxjwxc/ginrpc.svg)](https://starchart.cc/xxjwxc/ginrpc)
+  
 ## 下一步
 
 	1.导出api文档
