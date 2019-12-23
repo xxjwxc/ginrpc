@@ -10,8 +10,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/xxjwxc/public/errors"
 	"github.com/xxjwxc/public/mybigcamel"
+	"github.com/xxjwxc/public/myreflect"
 )
 
 // checkHandlerFunc Judge whether to match rules
@@ -103,7 +105,28 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 	return func(c *gin.Context) {
 		req := reflect.New(reqType)
 		if err := b.unmarshal(c, req.Interface()); err != nil { // Return error message.返回错误信息
-			c.JSON(http.StatusBadRequest, gin.H{"state": false, "code": 1001, "error": err.Error()})
+			var fields []string
+			for _, err := range err.(validator.ValidationErrors) {
+				tmp := fmt.Sprintf("%v:%v", myreflect.FindTag(req.Interface(), err.Field(), "json"), err.Tag())
+				if len(err.Param()) > 0 {
+					tmp += fmt.Sprintf("[%v](but[%v])", err.Param(), err.Value())
+				}
+				fields = append(fields, tmp)
+				// fmt.Println(err.Namespace())
+				// fmt.Println(err.Field())
+				// fmt.Println(err.StructNamespace()) // can differ when a custom TagNameFunc is registered or
+				// fmt.Println(err.StructField())     // by passing alt name to ReportError like below
+				// fmt.Println(err.Tag())
+				// fmt.Println(err.ActualTag())
+				// fmt.Println(err.Kind())
+				// fmt.Println(err.Type())
+				// fmt.Println(err.Value())
+				// fmt.Println(err.Param())
+				// fmt.Println()
+			}
+
+			c.JSON(http.StatusBadRequest, gin.H{"state": false, "code": 1001,
+				"error": fmt.Sprintf("req param : %s", strings.Join(fields, ";"))})
 			return
 		}
 
