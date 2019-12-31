@@ -1,8 +1,10 @@
+[![Build Status](https://travis-ci.org/xxjwxc/ginprc.svg?branch=master)](https://travis-ci.org/xxjwxc/ginprc)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xxjwxc/ginprc)](https://goreportcard.com/report/github.com/xxjwxc/ginprc)
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 # [English](README.md)
 
 ## [ginprc](https://github.com/xxjwxc/ginrpc) 注解路由，自动参数绑定工具
 
-[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
 
 ## golang gin 参数自动绑定工具
 - 支持对象自动注册及注解路由
