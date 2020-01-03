@@ -86,7 +86,7 @@ func genOutPut(outDir, modFile string) {
 		panic(err)
 	}
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, data)
+	tmpl.Execute(&buf, data)
 	tools.WriteFile(outDir+"gen_router.go", []string{buf.String()}, true)
 
 	// format

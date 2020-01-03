@@ -260,7 +260,7 @@ func (b *_Base) register(router *gin.Engine, cList ...interface{}) bool {
 					for _, v1 := range v {
 						b.registerHandlerObj(router, v1.Methods, buildRelativePath(b.groupPath, v1.RouterPath), method.Func, refVal)
 					}
-				} else { // not find using defualt case
+				} else { // not find using default case
 					routerPath, methods := b.getDefaultComments(objName, method.Name, num)
 					b.registerHandlerObj(router, methods, buildRelativePath(b.groupPath, routerPath), method.Func, refVal)
 				}

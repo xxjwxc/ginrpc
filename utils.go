@@ -41,7 +41,7 @@ func getModuleInfo() (string, string, bool) {
 				if len(list) > 0 {
 					line := strings.TrimSpace(list[0])
 					if len(line) > 0 && strings.HasPrefix(line, "module") { // find it
-						return strings.TrimSpace(line[7:]), filename,true
+						return strings.TrimSpace(line[7:]), filename, true
 					}
 				}
 			}
@@ -52,7 +52,7 @@ func getModuleInfo() (string, string, bool) {
 	}
 
 	// never reach
-	return "", "",false
+	return "", "", false
 }
 
 // Return to relative path . 通过module 游标返回包相对路径

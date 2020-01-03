@@ -8,6 +8,7 @@ import (
 	"github.com/xxjwxc/ginrpc/api"
 )
 
+// ReqTest struct test
 type ReqTest struct {
 	AccessToken string `json:"access_token"`
 	UserName    string `json:"user_name" binding:"required"` // 带校验方式
