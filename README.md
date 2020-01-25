@@ -18,6 +18,8 @@
 - base on [go-gin](https://github.com/gin-gonic/gin) on json restful style
 - implementation of parameter filtering and binding with request
 - code registration simple and supports multiple ways of registration
+- [grpc-go](https://github.com/grpc/grpc-go) bind support
+
 
 ## API details
 
