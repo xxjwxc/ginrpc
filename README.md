@@ -35,6 +35,9 @@
 
   func(*gin.Context,req)
 
+- func(*gin.Context,*req)(*resp,error) // go-gin context,with request,return parameter and error ==> [grpc-go](https://github.com/grpc/grpc-go)
+
+  func(*gin.Context,req)(resp,error)
 
 ## 一,Parameter auto binding
 
@@ -56,8 +59,8 @@ type ReqTest struct {
 	Password     string `json:"password"`
 }
 
-//TestFun4 Callback method with custom context and resolved req parameters
-func TestFun4(c *gin.Context, req ReqTest) {
+//TestFun6 Callback method with custom context and resolved req parameters
+func TestFun6(c *gin.Context, req ReqTest)  (*ReqTest, error) {
 	fmt.Println(c.Params)
 	fmt.Println(req)
 
@@ -67,7 +70,7 @@ func TestFun4(c *gin.Context, req ReqTest) {
 func main() {
 	base := ginrpc.New() 
 	router := gin.Default()
-	router.POST("/test4", base.HandlerFunc(TestFun4))
+	router.POST("/test6", base.HandlerFunc(TestFun6))
 	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", TestFun4) // Multiple request mode registration
 	router.Run(":8080")
 }
@@ -125,6 +128,13 @@ func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
 	c.JSON(http.StatusOK, "ok")
 }
 
+// [grpc-go](https://github.com/grpc/grpc-go)
+// with request,return parameter and error
+// Hello3 Route without annotation (the parameter is 2 default post)
+func (s *Hello) Hello3(c *gin.Context, req ReqTest) (*ReqTest, error) {
+	fmt.Println(req)
+	return &req,nil
+}
 
 func main() {
 	base := ginrpc.New(ginrpc.WithCtx(func(c *gin.Context) interface{} {

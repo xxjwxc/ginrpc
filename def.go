@@ -1,6 +1,8 @@
 package ginrpc
 
 import (
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc/api"
 )
@@ -41,15 +43,21 @@ type genInfo struct {
 // 	list []genRouterInfo
 // }
 
-var genTemp string = `
-package {{.PkgName}}
+var (
+	// Precompute the reflect type for error. Can't use error directly
+	// because Typeof takes an empty interface value. This is annoying.
+	typeOfError = reflect.TypeOf((*error)(nil)).Elem()
 
-import (
-	"github.com/xxjwxc/ginrpc"
+	genTemp = `
+	package {{.PkgName}}
+	
+	import (
+		"github.com/xxjwxc/ginrpc"
+	)
+	
+	func init() {
+		ginrpc.SetVersion({{.Tm}})
+		{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.RouterPath}}", []string{ {{GetStringList .Methods}} })
+		{{end}} }
+	`
 )
-
-func init() {
-	ginrpc.SetVersion({{.Tm}})
-	{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.RouterPath}}", []string{ {{GetStringList .Methods}} })
-	{{end}} }
-`

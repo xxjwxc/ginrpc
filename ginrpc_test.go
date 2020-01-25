@@ -94,6 +94,15 @@ func (s *Hello) HelloS2(c *api.Context, req *ReqTest1) {
 	fmt.Println(s.Index)
 	c.JSON(http.StatusOK, "ok")
 }
+
+// HelloS3 ...
+func (s *Hello) HelloS3(c *api.Context, req *ReqTest1) (*ReqTest1, error) {
+	fmt.Println(c.Params)
+	fmt.Println(req)
+	fmt.Println(s.Index)
+	return req, nil
+}
+
 func TestObj(t *testing.T) {
 	base := New(WithCtx(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)

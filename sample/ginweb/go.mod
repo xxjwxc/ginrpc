@@ -7,3 +7,5 @@ require (
 	github.com/xxjwxc/ginrpc v0.0.0-20191223035130-df2d52082d41
 	gopkg.in/go-playground/validator.v9 v9.30.2 // indirect
 )
+
+replace github.com/xxjwxc/ginrpc v0.0.0-20191223035130-df2d52082d41 => ../../

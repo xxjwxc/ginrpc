@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/xxjwxc/public/errors"
+	"github.com/xxjwxc/public/message"
 	"github.com/xxjwxc/public/mybigcamel"
 	"github.com/xxjwxc/public/myreflect"
 )
@@ -80,6 +81,17 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 		return nil, errors.New("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " not support!")
 	}
 
+	if typ.NumOut() != 0 {
+		if typ.NumOut() == 2 { // Parameter checking 参数检查
+			if returnType := typ.Out(1); returnType != typeOfError {
+				return nil, errors.Errorf("method : %v , returns[1] %v not error",
+					runtime.FuncForPC(tvl.Pointer()).Name(), returnType.String())
+			}
+		} else {
+			return nil, errors.Errorf("method : %v , Only 2 return values (obj, error) are supported", runtime.FuncForPC(tvl.Pointer()).Name())
+		}
+	}
+
 	ctxType, reqType := typ.In(0+offset), typ.In(1+offset)
 
 	reqIsGinCtx := false
@@ -125,15 +137,27 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 				// fmt.Println()
 			}
 
-			c.JSON(http.StatusBadRequest, gin.H{"state": false, "code": 1001,
-				"error": fmt.Sprintf("req param : %s", strings.Join(fields, ";"))})
+			msg := message.GetErrorMsg(message.ParameterInvalid)
+			msg.Error = fmt.Sprintf("req param : %v", strings.Join(fields, ";"))
+			c.JSON(http.StatusBadRequest, msg)
 			return
 		}
-
+		var returnValues []reflect.Value
 		if offset > 0 {
-			tvl.Call([]reflect.Value{tvls[1], reflect.ValueOf(apiFun(c)), req.Elem()})
+			returnValues = tvl.Call([]reflect.Value{tvls[1], reflect.ValueOf(apiFun(c)), req.Elem()})
 		} else {
-			tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req.Elem()})
+			returnValues = tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req.Elem()})
+		}
+		if returnValues != nil {
+			obj := returnValues[0].Interface()
+			rerr := returnValues[1].Interface()
+			if rerr != nil {
+				msg := message.GetErrorMsg(message.InValidOp)
+				msg.Error = rerr.(error).Error()
+				c.JSON(http.StatusBadRequest, msg)
+			} else {
+				c.JSON(http.StatusOK, obj)
+			}
 		}
 	}, nil
 }

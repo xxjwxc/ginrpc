@@ -38,6 +38,13 @@ func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
 	c.JSON(http.StatusOK, "ok")
 }
 
+//Hello3 带自定义context跟已解析的req参数回调方式,err,resp 返回模式
+func (s *Hello) Hello3(c *gin.Context, req ReqTest) (*ReqTest, error) {
+	fmt.Println(req)
+	//c.JSON(http.StatusOK, req)
+	return &req, nil
+}
+
 //TestFun1 gin 默认的函数回调地址
 func TestFun1(c *gin.Context) {
 	c.String(200, "ok")
@@ -60,12 +67,29 @@ func TestFun4(c *gin.Context, req ReqTest) {
 	c.JSON(http.StatusOK, req)
 }
 
+//TestFun5 带自定义context跟已解析的req参数回调方式,err,resp 返回模式
+func TestFun5(c *gin.Context, req ReqTest) (ReqTest, error) {
+	fmt.Println(req)
+	//c.JSON(http.StatusOK, req)
+	return req, nil
+}
+
+//TestFun6 带自定义context跟已解析的req参数回调方式,err,resp 返回模式
+func TestFun6(c *gin.Context, req ReqTest) (*ReqTest, error) {
+	fmt.Println(req)
+	//c.JSON(http.StatusOK, req)
+	return &req, nil
+}
+
 func main() {
 	base := ginrpc.New(ginrpc.WithCtx(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
 	}), ginrpc.WithDebug(true), ginrpc.WithGroup("xxjwxc"))
-
 	router := gin.Default()
+
+	router.POST("/test5", base.HandlerFunc(TestFun5)) // 函数注册
+	router.POST("/test6", base.HandlerFunc(TestFun6)) // 函数注册
+
 	h := new(Hello)
 	h.Index = 123
 	base.Register(router, h)                          // 对象注册

@@ -13,7 +13,7 @@
 - 支持参数自动绑定
 - 自带请求参数过滤及绑定实现 binding:"required"  [validator](go-playground/validator.v8)
 
-### 支持3种接口模式
+### 支持多种接口模式
 
 - func(*gin.Context) //go-gin 原始接口
 
@@ -23,6 +23,9 @@
 
 - func(*gin.Context,*req) //go-gin context类型,带request 请求参数
 
+- func(*gin.Context,*req)(*resp,error) //go-gin context类型,带request 请求参数,带错误返回参数 ==> [grpc-go](https://github.com/grpc/grpc-go)
+
+   func(*gin.Context,req)(resp,error)
 
 ## 1.参数自动绑定
 
@@ -44,16 +47,17 @@ type ReqTest struct {
 	Password    string `json:"password"`
 }
 
-//TestFun4 带自定义context跟已解析的req参数回调方式
-func TestFun4(c *api.Context, req ReqTest) {
+//TestFun6 带自定义context跟已解析的req参数回调方式,err,resp 返回模式
+func TestFun6(c *gin.Context, req ReqTest) (*ReqTest, error) {
 	fmt.Println(req)
-	c.WriteJSON(req) // 返回结果
+	//c.JSON(http.StatusOK, req)
+	return &req, nil
 }
 
 func main() {
 	base := ginrpc.New()
 	router := gin.Default()
-	router.POST("/test4", base.HandlerFunc(TestFun4))
+	router.POST("/test6", base.HandlerFunc(TestFun6))
 	router.Run(":8080")
 }
 
@@ -110,6 +114,12 @@ func (s *Hello) Hello(c *api.Context, req *ReqTest) {
 func (s *Hello) Hello2(c *gin.Context, req ReqTest) {
 	fmt.Println(req)
 	c.JSON(http.StatusOK, "ok") // gin 默认返回结果
+}
+
+// Hello3 [grpc-go](https://github.com/grpc/grpc-go) 模式
+func (s *Hello) Hello3(c *gin.Context, req ReqTest) (*ReqTest, error) {
+	fmt.Println(req)
+	return &req,nil
 }
 
 func main() {

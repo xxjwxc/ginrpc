@@ -5,5 +5,5 @@ import (
 )
 
 func init() {
-	ginrpc.SetVersion(1577047887)
+	ginrpc.SetVersion(1579965388)
 }

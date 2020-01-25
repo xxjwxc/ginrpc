@@ -41,6 +41,13 @@ func TestFun(t *testing.T) {
 		c.JSON(http.StatusOK, req)
 	})
 
+	ginrpc.HandlerFunc(func(c *gin.Context, req ReqTest) (*ReqTest, error) {
+		fmt.Println(c.Params)
+		fmt.Println(req)
+
+		return &req, nil
+	})
+
 	gin.SetMode(gin.ReleaseMode)
 	// router := gin.Default()
 	// router.Run(":8080")
