@@ -177,6 +177,8 @@ func main() {
 
 ### 2. 注解路由调用demo：[ginweb](/sample/ginweb)
 
+### 3. 支持绑定grpc函数: [ginweb](/sample/ginweb)
+
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/xxjwxc/ginrpc.svg)](https://starchart.cc/xxjwxc/ginrpc)
