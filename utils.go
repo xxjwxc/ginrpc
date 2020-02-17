@@ -82,7 +82,7 @@ func getAstPkgs(objPkg, objFile string) (*ast.Package, bool) {
 
 	// check the package is same.判断 package 是否一致
 	for _, pkg := range astPkgs {
-		if objPkg == pkg.Name { // find it
+		if objPkg == pkg.Name  || strings.HasSuffix(objPkg, "/"+pkg.Name){ // find it
 			return pkg, true
 		}
 	}
