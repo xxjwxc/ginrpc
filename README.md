@@ -118,7 +118,7 @@ type Hello struct {
 }
 
 // Hello Annotated route (bese on beego way)
-// @router /block [post,get]
+// @Router /block [post,get]
 func (s *Hello) Hello(c *api.Context, req *ReqTest) {
 	fmt.Println(req)
 	c.JSON(http.StatusOK, "ok")
@@ -153,9 +153,9 @@ func main() {
 ### - Annotation routing related instructions
 
 ```
- // @router /block [post,get]
+ // @Router /block [post,get]
 
-@router tag  /block router [post,get] method 
+@Router tag  /block router [post,get] method 
 
  ```
 

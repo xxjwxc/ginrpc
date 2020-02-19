@@ -105,7 +105,7 @@ type Hello struct {
 }
 
 // Hello 带注解路由(参考beego形式)
-// @router /block [post,get]
+// @Router /block [post,get]
 func (s *Hello) Hello(c *api.Context, req *ReqTest) {
 	fmt.Println(req)
 	c.WriteJSON(req) // 返回结果
@@ -148,8 +148,8 @@ func main() {
 ### -注解路由相关说明
 
 ```
- // @router /block [post,get]
-@router 标记  /block 路由 [post,get] method 调用方式
+ // @Router /block [post,get]
+@Router 标记  /block 路由 [post,get] method 调用方式
 
  ```
 

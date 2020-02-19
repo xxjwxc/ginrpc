@@ -24,7 +24,7 @@ type Hello struct {
 }
 
 // Hello 带注解路由(参考beego形式)
-// @router /block [post,get]
+// @Router /block [post,get]
 func (s *Hello) Hello(c *api.Context, req *ReqTest) {
 	fmt.Println(req)
 	fmt.Println(s.Index)
