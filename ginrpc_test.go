@@ -80,7 +80,7 @@ type Hello struct {
 }
 
 // HelloS ...
-// @router /block [post,get]
+// @Router /block [post,get]
 func (s *Hello) HelloS(c *api.Context, req *ReqTest1) {
 	fmt.Println(c.Params)
 	fmt.Println(req)

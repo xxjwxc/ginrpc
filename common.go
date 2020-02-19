@@ -176,7 +176,7 @@ func (b *_Base) unmarshal(c *gin.Context, v interface{}) error {
 	return c.ShouldBind(v)
 }
 
-var routeRegex = regexp.MustCompile(`@router\s+(\S+)(?:\s+\[(\S+)\])?`)
+var routeRegex = regexp.MustCompile(`@Router\s+(\S+)(?:\s+\[(\S+)\])?`)
 
 func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, num int) []genComment {
 	var gcs []genComment
@@ -184,7 +184,7 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, num int
 		for _, c := range f.Doc.List {
 			gc := genComment{}
 			t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
-			if strings.HasPrefix(t, "@router") {
+			if strings.HasPrefix(t, "@Router") {
 				t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
 				matches := routeRegex.FindStringSubmatch(t)
 				if len(matches) == 3 {
