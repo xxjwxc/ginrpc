@@ -1,6 +1,7 @@
 package ginrpc
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"net/http"
@@ -118,23 +119,32 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 		req := reflect.New(reqType)
 		if err := b.unmarshal(c, req.Interface()); err != nil { // Return error message.返回错误信息
 			var fields []string
-			for _, err := range err.(validator.ValidationErrors) {
-				tmp := fmt.Sprintf("%v:%v", myreflect.FindTag(req.Interface(), err.Field(), "json"), err.Tag())
-				if len(err.Param()) > 0 {
-					tmp += fmt.Sprintf("[%v](but[%v])", err.Param(), err.Value())
+			if _, ok := err.(validator.ValidationErrors); ok {
+				for _, err := range err.(validator.ValidationErrors) {
+					tmp := fmt.Sprintf("%v:%v", myreflect.FindTag(req.Interface(), err.Field(), "json"), err.Tag())
+					if len(err.Param()) > 0 {
+						tmp += fmt.Sprintf("[%v](but[%v])", err.Param(), err.Value())
+					}
+					fields = append(fields, tmp)
+					// fmt.Println(err.Namespace())
+					// fmt.Println(err.Field())
+					// fmt.Println(err.StructNamespace()) // can differ when a custom TagNameFunc is registered or
+					// fmt.Println(err.StructField())     // by passing alt name to ReportError like below
+					// fmt.Println(err.Tag())
+					// fmt.Println(err.ActualTag())
+					// fmt.Println(err.Kind())
+					// fmt.Println(err.Type())
+					// fmt.Println(err.Value())
+					// fmt.Println(err.Param())
+					// fmt.Println()
 				}
+			} else if _, ok := err.(*json.UnmarshalTypeError); ok {
+				err := err.(*json.UnmarshalTypeError)
+				tmp := fmt.Sprintf("%v:%v(but[%v])", err.Field, err.Type.String(), err.Value)
 				fields = append(fields, tmp)
-				// fmt.Println(err.Namespace())
-				// fmt.Println(err.Field())
-				// fmt.Println(err.StructNamespace()) // can differ when a custom TagNameFunc is registered or
-				// fmt.Println(err.StructField())     // by passing alt name to ReportError like below
-				// fmt.Println(err.Tag())
-				// fmt.Println(err.ActualTag())
-				// fmt.Println(err.Kind())
-				// fmt.Println(err.Type())
-				// fmt.Println(err.Value())
-				// fmt.Println(err.Param())
-				// fmt.Println()
+
+			} else {
+				fields = append(fields, err.Error())
 			}
 
 			msg := message.GetErrorMsg(message.ParameterInvalid)
