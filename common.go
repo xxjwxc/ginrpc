@@ -106,10 +106,10 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 		return nil, errors.New("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " first parm not support!")
 	}
 
-	// reqIsValue := true
-	// if reqType.Kind() == reflect.Ptr {
-	// 	reqIsValue = false
-	// }
+	reqIsValue := true
+	if reqType.Kind() == reflect.Ptr {
+		reqIsValue = false
+	}
 	apiFun := func(c *gin.Context) interface{} { return c }
 	if !reqIsGinCtx {
 		apiFun = b.apiFun
@@ -117,6 +117,11 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 
 	return func(c *gin.Context) {
 		req := reflect.New(reqType)
+		if reqIsValue {
+			req = reflect.New(reqType)
+		} else {
+			req = reflect.New(reqType.Elem())
+		}
 		if err := b.unmarshal(c, req.Interface()); err != nil { // Return error message.返回错误信息
 			var fields []string
 			if _, ok := err.(validator.ValidationErrors); ok {
@@ -152,11 +157,15 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 			c.JSON(http.StatusBadRequest, msg)
 			return
 		}
+
+		if reqIsValue {
+			req = req.Elem()
+		}
 		var returnValues []reflect.Value
 		if offset > 0 {
-			returnValues = tvl.Call([]reflect.Value{tvls[1], reflect.ValueOf(apiFun(c)), req.Elem()})
+			returnValues = tvl.Call([]reflect.Value{tvls[1], reflect.ValueOf(apiFun(c)), req})
 		} else {
-			returnValues = tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req.Elem()})
+			returnValues = tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req})
 		}
 		if returnValues != nil {
 			obj := returnValues[0].Interface()
