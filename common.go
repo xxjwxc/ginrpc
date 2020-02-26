@@ -44,8 +44,8 @@ func (b *_Base) checkHandlerFunc(typ reflect.Type, isObj bool) (int, bool) { // 
 // HandlerFunc Get and filter the parameters to be bound (object call type)
 func (b *_Base) handlerFuncObj(tvl, obj reflect.Value) gin.HandlerFunc { // 获取并过滤要绑定的参数(obj 对象类型)
 	typ := tvl.Type()
-	if typ.NumIn() == 1 { // Parameter checking 参数检查
-		ctxType := typ.In(0)
+	if typ.NumIn() == 2 { // Parameter checking 参数检查
+		ctxType := typ.In(1)
 
 		// go-gin default method
 		apiFun := func(c *gin.Context) interface{} { return c }
