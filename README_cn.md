@@ -110,7 +110,7 @@ func main() {
 }
    ```
 
-[更多>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
+[更多>>](https://github.com/gmsec/gmsec)
 
 ### 执行curl，可以自动参数绑定。直接看结果
 
@@ -154,9 +154,9 @@ _ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
 
 [更多>>](https://godoc.org/github.com/xxjwxc/ginrpc)
 
-### 2. 注解路由调用demo：[ginweb](/sample/ginweb)
+### 2. 注解路由调用demo：[gmsec](https://github.com/gmsec/gmsec)
 
-### 3. 支持绑定grpc函数: [ginweb](/sample/ginweb)
+### 3. 支持绑定grpc函数: [gmsec](https://github.com/gmsec/gmsec)
 
 ## 二. swagger/markdown/mindoc 文档生成说明
 

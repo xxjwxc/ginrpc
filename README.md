@@ -54,7 +54,7 @@
 ### Initialization project (this project is named after `ginweb`)
 	``` go mod init ginweb ```
 
-### coding [more>>](https://github.com/xxjwxc/ginrpc/tree/master/sample/ginweb)
+### coding [more>>](hhttps://github.com/gmsec/gmsec)
 ```go
 
 package main
@@ -143,7 +143,7 @@ func main() {
 
 ### 2. way of annotation route :
 
-	more to saying  [ginweb](/sample/ginweb)
+	more to saying  [gmsec](https://github.com/gmsec/gmsec)
 
 ### 3. Parameter description
 
