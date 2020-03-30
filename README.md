@@ -29,6 +29,12 @@
 
 - [DEMO](https://github.com/xxjwxc/gmsec)
 
+## Installing
+- go mod:
+```
+go get -u github.com/xxjwxc/ginrpc@master
+```
+
 ## API details
 
 ### Three interface modes are supported

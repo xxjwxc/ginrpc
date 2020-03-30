@@ -24,6 +24,12 @@
 
 - [更多请看](https://github.com/gmsec/gmsec)
 
+## 安装使用
+- go mod:
+```
+go get -u github.com/xxjwxc/ginrpc@master
+```
+
 ### 支持多种接口模式
 
 - func(*gin.Context) //go-gin 原始接口
