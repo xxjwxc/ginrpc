@@ -46,9 +46,9 @@ go get -u github.com/xxjwxc/ginrpc@master
 
 ## 一. 参数自动绑定/对象注册(注解路由)
 
-### 初始化项目(本项目以ginweb 为名字)
+### 初始化项目(本项目以gmsec 为名字)
 
-` go mod init ginweb `
+` go mod init gmsec `
 
 ### 代码 
 
@@ -59,7 +59,7 @@ import (
 	"fmt"
 	"net/http"
 
-	_ "ginweb/routers" // debug模式需要添加[mod]/routers 注册注解路由
+	_ "gmsec/routers" // debug模式需要添加[mod]/routers 注册注解路由
 	"github.com/xxjwxc/public/mydoc/myswagger" // swagger 支持
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc"
@@ -133,8 +133,10 @@ func main() {
 ### -注解路由相关说明
 
 ```
- // @Router /block [post,get]
-@Router 标记  /block 路由 [post,get] method 调用方式
+// @Router /block [post,get]
+@Router 标记 
+/block 路由 
+[post,get] method 调用方式
 
  ```
 

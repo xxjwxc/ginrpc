@@ -55,12 +55,13 @@ go get -u github.com/xxjwxc/ginrpc@master
 
   func(*gin.Context,req)(resp,error)
 
-## 一 Parameter auto binding,Object registration (annotation routing)
+## 一. Parameter auto binding,Object registration (annotation routing)
 
-### Initialization project (this project is named after `ginweb`)
-	``` go mod init ginweb ```
+### Initialization project (this project is named after `gmsec`)
+	``` go mod init gmsec ```
 
 ### coding [more>>](hhttps://github.com/gmsec/gmsec)
+
 ```go
 
 package main
@@ -69,7 +70,7 @@ import (
 	"fmt"
 	"net/http"
 
-	_ "ginweb/routers" // Debug mode requires adding [mod] / routes to register annotation routes.debug模式需要添加[mod]/routers 注册注解路由
+	_ "gmsec/routers" // Debug mode requires adding [mod] / routes to register annotation routes.debug模式需要添加[mod]/routers 注册注解路由
 	"github.com/xxjwxc/public/mydoc/myswagger" // swagger 支持
 
 	"github.com/gin-gonic/gin"
@@ -128,9 +129,11 @@ func main() {
 ### - Annotation routing related instructions
 
 ```
- // @Router /block [post,get]
 
-@Router tag  /block router [post,get] method 
+// @Router /block [post,get]
+@Router tag  
+/block router 
+[post,get] method 
 
  ```
 
