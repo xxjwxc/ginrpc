@@ -216,48 +216,49 @@ func (b *_Base) parserStruct(req, resp *parmInfo, astPkg *ast.Package, modPkg, m
 
 var routeRegex = regexp.MustCompile(`@Router\s+(\S+)(?:\s+\[(\S+)\])?`)
 
+func analysisParm(f *ast.FieldList, imports map[string]string, objPkg string, n int) (parm *parmInfo) {
+	if f != nil {
+		if f.NumFields() > 1 {
+			parm = &parmInfo{}
+			d := f.List[n].Type
+			switch exp := d.(type) {
+			case *ast.SelectorExpr: // 非本文件包
+				parm.Type = exp.Sel.Name
+				if x, ok := exp.X.(*ast.Ident); ok {
+					parm.Import = imports[x.Name]
+					parm.Pkg = myast.GetImportPkg(parm.Import)
+				}
+			case *ast.StarExpr: // 本文件
+				switch expx := exp.X.(type) {
+				case *ast.SelectorExpr: // 非本地包
+					parm.Type = expx.Sel.Name
+					if x, ok := expx.X.(*ast.Ident); ok {
+						parm.Pkg = x.Name
+						parm.Import = imports[parm.Pkg]
+					}
+				case *ast.Ident: // 本文件
+					parm.Type = expx.Name
+					parm.Import = objPkg // 本包
+				default:
+					panic(fmt.Sprintf("not find any expx.(%v)", reflect.TypeOf(expx)))
+				}
+			case *ast.Ident: // 本文件
+				parm.Type = exp.Name
+				parm.Import = objPkg // 本包
+			default:
+				panic(fmt.Sprintf("not find any exp.(%v)", reflect.TypeOf(d)))
+			}
+		}
+	}
+
+	return
+}
+
 func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports map[string]string, objPkg string, num int) ([]genComment, *parmInfo, *parmInfo) {
 	var note string
 	var gcs []genComment
-	var req, resp *parmInfo
-	if f.Type.Params != nil {
-		if f.Type.Params.NumFields() > 1 {
-			req = &parmInfo{}
-			d := f.Type.Params.List[1].Type
-			switch exp := d.(type) {
-			case *ast.SelectorExpr: // 非本文件包
-				req.Type = exp.Sel.Name
-				if x, ok := exp.X.(*ast.Ident); ok {
-					req.Import = imports[x.Name]
-					req.Pkg = myast.GetImportPkg(req.Import)
-				}
-			case *ast.StarExpr: // 本文件
-				if x, ok := exp.X.(*ast.Ident); ok {
-					req.Type = x.Name
-					req.Import = objPkg // 本包
-				}
-			}
-		}
-	}
-	if f.Type.Results != nil {
-		if f.Type.Results.NumFields() > 1 {
-			resp = &parmInfo{}
-			d := f.Type.Results.List[0].Type
-			if exp, ok := d.(*ast.StarExpr); ok {
-				switch expx := exp.X.(type) {
-				case *ast.SelectorExpr: // 非本地包
-					resp.Type = expx.Sel.Name
-					if x, ok := expx.X.(*ast.Ident); ok {
-						resp.Pkg = x.Name
-						resp.Import = imports[resp.Pkg]
-					}
-				case *ast.Ident: // 本文件
-					resp.Type = expx.Name
-					resp.Import = objPkg // 本包
-				}
-			}
-		}
-	}
+	req := analysisParm(f.Type.Params, imports, objPkg, 1)
+	resp := analysisParm(f.Type.Results, imports, objPkg, 0)
 
 	if f.Doc != nil {
 		for _, c := range f.Doc.List {
