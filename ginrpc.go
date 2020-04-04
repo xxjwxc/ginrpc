@@ -33,6 +33,16 @@ func (f optionFunc) apply(o *_Base) {
 	f(o)
 }
 
+// WithOutPath set output path dir with router.go file.设置输出目录
+func WithOutPath(path string) Option {
+	return optionFunc(func(o *_Base) {
+		if !strings.HasSuffix(path, "/") {
+			path += "/"
+		}
+		o.outPath = path
+	})
+}
+
 // WithCtx use custom context.设置自定义context
 func WithCtx(middleware NewAPIFunc) Option {
 	return optionFunc(func(o *_Base) {
