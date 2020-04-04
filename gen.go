@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 	"sync"
 	"text/template"
@@ -14,13 +15,17 @@ import (
 	"github.com/xxjwxc/public/tools"
 )
 
+const (
+	getRouter = "/conf/gen_router.data"
+)
+
 var _mu sync.Mutex // protects the serviceMap
 var _once sync.Once
 var _genInfo genInfo
 var _genInfoCnf genInfo
 
 func init() {
-	data, err := ioutil.ReadFile(tools.GetModelPath() + "/gen_router.data")
+	data, err := ioutil.ReadFile(path.Join(tools.GetModelPath(), getRouter))
 	if err == nil {
 		serializing.Decode(data, &_genInfoCnf) // gob de serialize 反序列化
 	}
@@ -95,7 +100,7 @@ func genOutPut(outDir, modFile string) {
 	// gob serialize 序列化
 	_data, _ := serializing.Encode(_genInfo)
 	flag := os.O_CREATE | os.O_WRONLY | os.O_TRUNC
-	f, err := os.OpenFile(tools.GetModelPath()+"/gen_router.data", flag, 0666)
+	f, err := os.OpenFile(path.Join(tools.GetModelPath(), getRouter), flag, 0666)
 	if err != nil {
 		return
 	}
