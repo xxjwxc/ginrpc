@@ -15,7 +15,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
-	github.com/xxjwxc/public v0.0.0-20200404170513-2f5f74aae818
+	github.com/xxjwxc/public v0.0.0-20200406150354-2b3a59ff9fca
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
