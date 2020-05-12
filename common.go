@@ -43,6 +43,12 @@ func (b *_Base) checkHandlerFunc(typ reflect.Type, isObj bool) (int, bool) { // 
 		if ctxType == b.apiType {
 			return num, true
 		}
+
+		// maybe interface
+		if b.apiType.ConvertibleTo(ctxType) {
+			return num, true
+		}
+
 	}
 	return num, false
 }
@@ -108,7 +114,7 @@ func (b *_Base) getCallFunc3(tvls ...reflect.Value) (func(*gin.Context), error) 
 
 	// ctxType != reflect.TypeOf(gin.Context{}) &&
 	// ctxType != reflect.Indirect(reflect.ValueOf(b.iAPIType)).Type()
-	if !reqIsGinCtx && ctxType != b.apiType {
+	if !reqIsGinCtx && ctxType != b.apiType && !b.apiType.ConvertibleTo(ctxType) {
 		return nil, errors.New("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " first parm not support!")
 	}
 
