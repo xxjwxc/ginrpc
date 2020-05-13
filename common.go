@@ -257,6 +257,18 @@ func analysisParm(f *ast.FieldList, imports map[string]string, objPkg string, n 
 		}
 	}
 
+	if parm != nil {
+		if len(parm.Pkg) > 0 {
+			var pkg string
+			n := strings.LastIndex(parm.Import, "/")
+			if n > 0 {
+				pkg = parm.Import[n+1:]
+			}
+			if len(pkg) > 0 {
+				parm.Pkg = pkg
+			}
+		}
+	}
 	return
 }
 
