@@ -71,13 +71,24 @@ func genOutPut(outDir, modFile string) {
 	_mu.Lock()
 	defer _mu.Unlock()
 
+	// genCode(outDir, modFile) // gen .go file
+
+	_genInfo.Tm = time.Now().Unix()
+	_data, _ := serializing.Encode(_genInfo) // gob serialize 序列化
+	f, err := os.Create(path.Join(tools.GetModelPath(), getRouter))
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	f.Write(_data)
+}
+
+func genCode(outDir, modFile string) {
+	_genInfo.Tm = time.Now().Unix()
 	if len(outDir) == 0 {
 		outDir = modFile + "/routers/"
 	}
 	pkgName := getPkgName(outDir)
-
-	_genInfo.Tm = time.Now().Unix()
-
 	data := struct {
 		genInfo
 		PkgName string
@@ -93,19 +104,8 @@ func genOutPut(outDir, modFile string) {
 	var buf bytes.Buffer
 	tmpl.Execute(&buf, data)
 	tools.WriteFile(outDir+"gen_router.go", []string{buf.String()}, true)
-
 	// format
 	exec.Command("gofmt", "-l", "-w", outDir).Output()
-
-	// gob serialize 序列化
-	_data, _ := serializing.Encode(_genInfo)
-	flag := os.O_CREATE | os.O_WRONLY | os.O_TRUNC
-	f, err := os.OpenFile(path.Join(tools.GetModelPath(), getRouter), flag, 0666)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	f.Write(_data)
 }
 
 func getPkgName(dir string) string {
