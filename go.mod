@@ -8,4 +8,4 @@ require (
 	github.com/xxjwxc/public v0.0.0-20200526160023-d8d1bd6babeb
 )
 
-// replace github.com/xxjwxc/public => ../public
+replace github.com/xxjwxc/public => ../public

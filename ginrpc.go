@@ -12,13 +12,10 @@ import (
 
 // _Base base struct
 type _Base struct {
-	// tag     int
 	isBigCamel bool // big camel style.大驼峰命名规则
 	isDev      bool // if is development
 	apiFun     NewAPIFunc
 	apiType    reflect.Type
-	router     *gin.Engine
-	groupPath  string // group path.添加路由前缀
 	outPath    string // output path.输出目录
 }
 
@@ -64,13 +61,6 @@ func WithBigCamel(b bool) Option {
 	})
 }
 
-// WithGroup Add route prefix.添加路由前缀
-func WithGroup(prepath string) Option {
-	return optionFunc(func(o *_Base) {
-		o.Group(prepath)
-	})
-}
-
 // Default new op obj
 func Default() *_Base {
 	b := new(_Base)
@@ -113,20 +103,8 @@ func (b *_Base) Model(middleware NewAPIFunc) *_Base {
 	return b
 }
 
-// Group creates a new router group. You should add all the routes that have common middlewares or the same path prefix.
-// For example, all the routes that use a common middleware for authorization could be grouped.
-// Last : you can us gin.Group replace this also (添加路由前缀,也可以调用gin.Group来设置)
-func (b *_Base) Group(prepath string) *_Base {
-	prepath = strings.Replace(prepath, "\\", "/", -1)
-	if !strings.HasSuffix(prepath, "/") {
-		prepath += "/"
-	}
-	b.groupPath = prepath
-	return b
-}
-
 // Register Registered by struct object,[prepath + bojname.]
-func (b *_Base) Register(router *gin.Engine, cList ...interface{}) bool {
+func (b *_Base) Register(router gin.IRouter, cList ...interface{}) bool {
 	if b.isDev {
 		b.tryGenRegister(router, cList...)
 	}
@@ -135,7 +113,7 @@ func (b *_Base) Register(router *gin.Engine, cList ...interface{}) bool {
 }
 
 // RegisterHandlerFunc Multiple registration methods.获取并过滤要绑定的参数
-func (b *_Base) RegisterHandlerFunc(router *gin.Engine, httpMethod []string, relativePath string, handlerFuncs ...interface{}) error {
+func (b *_Base) RegisterHandlerFunc(router gin.IRouter, httpMethod []string, relativePath string, handlerFuncs ...interface{}) error {
 	list := make([]gin.HandlerFunc, 0, len(handlerFuncs))
 	for _, call := range handlerFuncs {
 		list = append(list, b.HandlerFunc(call))

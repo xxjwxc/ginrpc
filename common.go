@@ -321,13 +321,14 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports
 }
 
 // tryGenRegister gen out the Registered config info  by struct object,[prepath + bojname.]
-func (b *_Base) tryGenRegister(router *gin.Engine, cList ...interface{}) bool {
+func (b *_Base) tryGenRegister(router gin.IRouter, cList ...interface{}) bool {
 	modPkg, modFile, isFind := myast.GetModuleInfo(2)
 	if !isFind {
 		return false
 	}
 
-	doc := mydoc.NewDoc(b.groupPath)
+	groupPath := b.BasePath(router)
+	doc := mydoc.NewDoc(groupPath)
 
 	for _, c := range cList {
 		refVal := reflect.ValueOf(c)
@@ -372,8 +373,19 @@ func (b *_Base) tryGenRegister(router *gin.Engine, cList ...interface{}) bool {
 	return true
 }
 
+func (b *_Base) BasePath(router gin.IRouter) string {
+	switch r := router.(type) {
+	case *gin.RouterGroup:
+		return r.BasePath()
+	case *gin.Engine:
+		return r.BasePath()
+	}
+	return ""
+}
+
 // register Registered by struct object,[prepath + bojname.]
-func (b *_Base) register(router *gin.Engine, cList ...interface{}) bool {
+func (b *_Base) register(router gin.IRouter, cList ...interface{}) bool {
+	// groupPath := b.BasePath(router)
 	mp := getInfo()
 	for _, c := range cList {
 		refTyp := reflect.TypeOf(c)
@@ -388,11 +400,11 @@ func (b *_Base) register(router *gin.Engine, cList ...interface{}) bool {
 			if _b {
 				if v, ok := mp[objName+"."+method.Name]; ok {
 					for _, v1 := range v {
-						b.registerHandlerObj(router, v1.Methods, buildRelativePath(b.groupPath, v1.RouterPath), method.Func, refVal)
+						b.registerHandlerObj(router, v1.GenComment.Methods, v1.GenComment.RouterPath, method.Func, refVal)
 					}
 				} else { // not find using default case
 					routerPath, methods := b.getDefaultComments(objName, method.Name, num)
-					b.registerHandlerObj(router, methods, buildRelativePath(b.groupPath, routerPath), method.Func, refVal)
+					b.registerHandlerObj(router, methods, routerPath, method.Func, refVal)
 				}
 			}
 		}
@@ -416,7 +428,7 @@ func (b *_Base) getDefaultComments(objName, objFunc string, num int) (routerPath
 }
 
 // registerHandlerObj Multiple registration methods.获取并过滤要绑定的参数
-func (b *_Base) registerHandlerObj(router *gin.Engine, httpMethod []string, relativePath string, tvl, obj reflect.Value) error {
+func (b *_Base) registerHandlerObj(router gin.IRouter, httpMethod []string, relativePath string, tvl, obj reflect.Value) error {
 	call := b.handlerFuncObj(tvl, obj)
 
 	for _, v := range httpMethod {

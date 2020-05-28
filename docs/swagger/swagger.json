@@ -1,0 +1,207 @@
+{
+     "swagger": "2.0",
+     "info": {
+          "description": "swagger default desc",
+          "version": "1.0.0",
+          "title": "Swagger Petstore"
+     },
+     "host": "localhost",
+     "basePath": "/v1",
+     "tags": [
+          {
+               "name": "Hello",
+               "description": ""
+          }
+     ],
+     "schemes": [
+          "http",
+          "https"
+     ],
+     "paths": {
+          "/Hello.HelloS2": {
+               "post": {
+                    "tags": [
+                         "Hello"
+                    ],
+                    "summary": "...",
+                    "description": "...",
+                    "consumes": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "produces": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "parameters": [
+                         {
+                              "in": "body",
+                              "name": "body",
+                              "description": "...",
+                              "required": true,
+                              "schema": {
+                                   "$ref": "#/definitions/ReqTest1"
+                              }
+                         }
+                    ],
+                    "responses": {
+                         "400": {
+                              "description": "v"
+                         },
+                         "404": {
+                              "description": "not found"
+                         },
+                         "405": {
+                              "description": "Validation exception"
+                         }
+                    }
+               }
+          },
+          "/Hello.HelloS3": {
+               "post": {
+                    "tags": [
+                         "Hello"
+                    ],
+                    "summary": "...",
+                    "description": "...",
+                    "consumes": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "produces": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "parameters": [
+                         {
+                              "in": "body",
+                              "name": "body",
+                              "description": "...",
+                              "required": true,
+                              "schema": {
+                                   "$ref": "#/definitions/ReqTest1"
+                              }
+                         }
+                    ],
+                    "responses": {
+                         "400": {
+                              "description": "v"
+                         },
+                         "404": {
+                              "description": "not found"
+                         },
+                         "405": {
+                              "description": "Validation exception"
+                         }
+                    }
+               }
+          },
+          "/block": {
+               "get": {
+                    "tags": [
+                         "Hello"
+                    ],
+                    "summary": "...",
+                    "description": "...",
+                    "consumes": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "produces": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "parameters": [
+                         {
+                              "in": "body",
+                              "name": "body",
+                              "description": "...",
+                              "required": true,
+                              "schema": {
+                                   "$ref": "#/definitions/ReqTest1"
+                              }
+                         }
+                    ],
+                    "responses": {
+                         "400": {
+                              "description": "v"
+                         },
+                         "404": {
+                              "description": "not found"
+                         },
+                         "405": {
+                              "description": "Validation exception"
+                         }
+                    }
+               },
+               "post": {
+                    "tags": [
+                         "Hello"
+                    ],
+                    "summary": "...",
+                    "description": "...",
+                    "consumes": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "produces": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "parameters": [
+                         {
+                              "in": "body",
+                              "name": "body",
+                              "description": "...",
+                              "required": true,
+                              "schema": {
+                                   "$ref": "#/definitions/ReqTest1"
+                              }
+                         }
+                    ],
+                    "responses": {
+                         "400": {
+                              "description": "v"
+                         },
+                         "404": {
+                              "description": "not found"
+                         },
+                         "405": {
+                              "description": "Validation exception"
+                         }
+                    }
+               }
+          }
+     },
+     "securityDefinitions": {},
+     "definitions": {
+          "ReqTest1": {
+               "type": "object",
+               "properties": {
+                    "access_token": {
+                         "type": "string",
+                         "format": "string",
+                         "description": "access_token"
+                    },
+                    "password": {
+                         "type": "string",
+                         "format": "string",
+                         "description": "password"
+                    },
+                    "user_name": {
+                         "type": "string",
+                         "format": "string",
+                         "description": "user name"
+                    }
+               },
+               "xml": {
+                    "name": "",
+                    "wrapped": false
+               }
+          }
+     },
+     "externalDocs": {
+          "description": "Find out more about Swagger",
+          "url": "https://github.com/xxjwxc/public"
+     }
+}

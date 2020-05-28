@@ -25,7 +25,7 @@ var _genInfo genInfo
 var _genInfoCnf genInfo
 
 func init() {
-	data, err := ioutil.ReadFile(path.Join(tools.GetModelPath(), getRouter))
+	data, err := ioutil.ReadFile(path.Join(tools.GetCurrentDirectory(), getRouter))
 	if err == nil {
 		serializing.Decode(data, &_genInfoCnf) // gob de serialize 反序列化
 	}
@@ -37,7 +37,7 @@ func AddGenOne(handFunName, routerPath string, methods []string) {
 	defer _mu.Unlock()
 	_genInfo.List = append(_genInfo.List, genRouterInfo{
 		HandFunName: handFunName,
-		genComment: genComment{
+		GenComment: genComment{
 			RouterPath: routerPath,
 			Methods:    methods,
 		},
@@ -71,11 +71,13 @@ func genOutPut(outDir, modFile string) {
 	_mu.Lock()
 	defer _mu.Unlock()
 
-	// genCode(outDir, modFile) // gen .go file
+	genCode(outDir, modFile) // gen .go file
 
 	_genInfo.Tm = time.Now().Unix()
-	_data, _ := serializing.Encode(_genInfo) // gob serialize 序列化
-	f, err := os.Create(path.Join(tools.GetModelPath(), getRouter))
+	_data, _ := serializing.Encode(&_genInfo) // gob serialize 序列化
+	_path := path.Join(tools.GetCurrentDirectory(), getRouter)
+	tools.BuildDir(_path)
+	f, err := os.Create(_path)
 	if err != nil {
 		return
 	}
@@ -103,7 +105,13 @@ func genCode(outDir, modFile string) {
 	}
 	var buf bytes.Buffer
 	tmpl.Execute(&buf, data)
-	tools.WriteFile(outDir+"gen_router.go", []string{buf.String()}, true)
+	f, err := os.Create(outDir + "gen_router.go")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	f.Write(buf.Bytes())
+
 	// format
 	exec.Command("gofmt", "-l", "-w", outDir).Output()
 }
@@ -119,7 +127,7 @@ func getPkgName(dir string) string {
 	}
 
 	if len(pkgName) == 0 || pkgName == "." {
-		list = strings.Split(tools.GetModelPath(), "/")
+		list = strings.Split(tools.GetCurrentDirectory(), "/")
 		if len(list) > 0 {
 			pkgName = list[len(list)-1]
 		}

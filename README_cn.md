@@ -107,8 +107,9 @@ func main() {
 	myswagger.SetBasePath("gmsec")
 	myswagger.SetSchemes(true, false)
 	// -----end --
-	base := ginrpc.New(ginrpc.WithGroup("xxjwxc"))
+	base := ginrpc.New())
 	router := gin.Default()
+	group := router.Group("/xxjwxc")
 	base.Register(router, new(Hello)) // 对象注册 like(go-micro)
 	router.POST("/test6", base.HandlerFunc(TestFun6))                            // 函数注册
 	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", TestFun6) // 多种请求方式注册
@@ -155,8 +156,6 @@ _ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
 	ginrpc.WithCtx ： 设置自定义context
 
 	ginrpc.WithDebug(true) : 设置debug模式
-
-	ginrpc.WithGroup("xxjwxc") : 添加路由前缀 (也可以使用gin.Group 分组)
 
 	ginrpc.WithBigCamel(true) : 设置大驼峰标准(false 为web模式，_,小写)
 

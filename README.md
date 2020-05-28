@@ -117,8 +117,8 @@ func main() {
 	myswagger.SetBasePath("gmsec")
 	myswagger.SetSchemes(true, false)
 	// -----end --
-	base := ginrpc.New(ginrpc.WithGroup("xxjwxc"))
-	router := gin.Default()
+	base := ginrpc.New()
+	router := gin.Default() // or router :=  gin.Default().Group("/xxjwxc")
 	base.Register(router, new(Hello)) // object register like(go-micro)
 	router.POST("/test6", base.HandlerFunc(TestFun6))                            // function register
 	base.RegisterHandlerFunc(router, []string{"post", "get"}, "/test", TestFun6) 
@@ -159,8 +159,6 @@ func main() {
 	ginrpc.WithCtx ： Set custom context
 
 	ginrpc.WithDebug(true) : Set debug mode
-
-	ginrpc.WithGroup("xxjwxc") : Add routing prefix (you can also use gin. Group grouping)
 
 	ginrpc.WithBigCamel(true) : Set big camel standard (false is web mode, _, lowercase)
 

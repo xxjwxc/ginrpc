@@ -37,7 +37,7 @@ type genComment struct {
 
 // router style list.路由规则列表
 type genRouterInfo struct {
-	genComment
+	GenComment  genComment
 	HandFunName string
 }
 
