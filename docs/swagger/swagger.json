@@ -18,7 +18,7 @@
           "https"
      ],
      "paths": {
-          "/Hello.HelloS2": {
+          "/xxjwxc/Hello.HelloS2": {
                "post": {
                     "tags": [
                          "Hello"
@@ -57,7 +57,7 @@
                     }
                }
           },
-          "/Hello.HelloS3": {
+          "/xxjwxc/Hello.HelloS3": {
                "post": {
                     "tags": [
                          "Hello"
@@ -96,7 +96,7 @@
                     }
                }
           },
-          "/block": {
+          "/xxjwxc/block": {
                "get": {
                     "tags": [
                          "Hello"

@@ -106,9 +106,9 @@ func (s *Hello) HelloS3(c *api.Context, req *ReqTest1) (*ReqTest1, error) {
 func TestObj(t *testing.T) {
 	base := New(WithCtx(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
-	}), WithDebug(true), WithBigCamel(true))
+	}), WithDebug(false), WithBigCamel(true))
 
-	router := gin.Default() // .Group("/xxjwxc")
+	router := gin.Default().Group("/xxjwxc")
 	h := new(Hello)
 	h.Index = 123
 	base.Register(router, h) //, new(api.Hello))
