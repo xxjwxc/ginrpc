@@ -26,6 +26,7 @@
 - [grpc-go](https://github.com/grpc/grpc-go) bind support
 - Support [swagger](http://editor.swagger.io/) [MORE](https://github.com/xxjwxc/gmsec)
 - Support [markdown/mindoc](https://www.iminho.me/) [MORE](https://github.com/xxjwxc/gmsec)
+- Support call before and after deal(`ginrpc.WithBeforeAfter`)
 
 - [DEMO](https://github.com/xxjwxc/gmsec)
 

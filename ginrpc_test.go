@@ -108,9 +108,9 @@ func TestObj(t *testing.T) {
 		return api.NewCtx(c)
 	}), WithDebug(false), WithBigCamel(true))
 
-	router := gin.Default().Group("/xxjwxc")
+	group := gin.Default().Group("/xxjwxc")
 	h := new(Hello)
 	h.Index = 123
-	base.Register(router, h) //, new(api.Hello))
+	base.Register(group, h) //, new(api.Hello))
 	// router.Run(":8080")
 }
