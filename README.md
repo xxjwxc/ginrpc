@@ -162,6 +162,8 @@ func main() {
 
 	ginrpc.WithBigCamel(true) : Set big camel standard (false is web mode, _, lowercase)
 
+	ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{}) : Before After call
+
 	[more>>](https://godoc.org/github.com/xxjwxc/ginrpc)
 
 ### 4. Execute curl to automatically bind parameters. See the results directly
@@ -188,6 +190,17 @@ type ReqTest struct {
 }
 ```
 - [more >>>](https://github.com/xxjwxc/gmsec)
+
+## 三. Support to call Middleware
+- using `ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{})` 
+- You can also implement functions (single types) on objects
+```go
+	// GinBeforeAfter Execute middleware before and after the object call (support adding the object separately from the object in total)
+	type GinBeforeAfter interface {
+		GinBefore(req *GinBeforeAfterInfo) bool
+		GinAfter(req *GinBeforeAfterInfo) bool
+	}
+```
 
 ## Stargazers over time
 

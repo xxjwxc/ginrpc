@@ -12,11 +12,12 @@ import (
 
 // _Base base struct
 type _Base struct {
-	isBigCamel bool // big camel style.大驼峰命名规则
-	isDev      bool // if is development
-	apiFun     NewAPIFunc
-	apiType    reflect.Type
-	outPath    string // output path.输出目录
+	isBigCamel  bool // big camel style.大驼峰命名规则
+	isDev       bool // if is development
+	apiFun      NewAPIFunc
+	apiType     reflect.Type
+	outPath     string // output path.输出目录
+	beforeAfter GinBeforeAfter
 }
 
 // Option overrides behavior of Connect.
@@ -58,6 +59,13 @@ func WithDebug(b bool) Option {
 func WithBigCamel(b bool) Option {
 	return optionFunc(func(o *_Base) {
 		o.isBigCamel = b
+	})
+}
+
+// WithBeforeAfter set before and after call.设置对象调用前后执行中间件
+func WithBeforeAfter(beforeAfter GinBeforeAfter) Option {
+	return optionFunc(func(o *_Base) {
+		o.beforeAfter = beforeAfter
 	})
 }
 

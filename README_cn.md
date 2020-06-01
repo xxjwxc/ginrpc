@@ -158,6 +158,8 @@ _ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
 	ginrpc.WithDebug(true) : 设置debug模式
 
 	ginrpc.WithBigCamel(true) : 设置大驼峰标准(false 为web模式，_,小写)
+	
+	ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{}) : 设置调用前后执行中间件
 
 [更多>>](https://godoc.org/github.com/xxjwxc/ginrpc)
 
@@ -181,6 +183,16 @@ type ReqTest struct {
 
 - [更多 >>>](https://github.com/xxjwxc/gmsec)
 
+## 三. 支持调用中间件
+- 可通过 `ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{})`设置(全局)
+- 也可以在对象上实现函数(单个类型)
+```go
+	// GinBeforeAfter 对象调用前后执行中间件(支持总的跟对象单独添加)
+	type GinBeforeAfter interface {
+		GinBefore(req *GinBeforeAfterInfo) bool
+		GinAfter(req *GinBeforeAfterInfo) bool
+	}
+```
 
 ## Stargazers over time
 
