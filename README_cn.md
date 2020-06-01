@@ -187,6 +187,7 @@ type ReqTest struct {
 ## 三. 支持调用中间件
 - (全局模式) 可通过 `ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{})`设置(全局)
 - (单个对象模式) 也可以在对象上实现函数(单个类型)
+
 ```go
 	// GinBeforeAfter 对象调用前后执行中间件(支持总的跟对象单独添加)
 	type GinBeforeAfter interface {
