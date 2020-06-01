@@ -199,8 +199,5 @@ type ReqTest struct {
 
 [![Stargazers over time](https://starchart.cc/xxjwxc/ginrpc.svg)](https://starchart.cc/xxjwxc/ginrpc)
 
-## 下一步
-
-- 添加服务发现
 
 ### 代码地址： [ginprc](https://github.com/xxjwxc/ginrpc) 如果喜欢请给星支持

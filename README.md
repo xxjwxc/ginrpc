@@ -206,12 +206,6 @@ type ReqTest struct {
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/xxjwxc/ginrpc.svg)](https://starchart.cc/xxjwxc/ginrpc)
-      
 
-## Next
-
-	1. Export API documents
-
-	2. Export postman test configuration
 
 ### coding address:[ginprc](https://github.com/xxjwxc/ginrpc) Please give star support
