@@ -173,7 +173,7 @@ _ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
 ### 2.导出支持注解路由,支持参数注释,支持默认值(`tag`.`default`)
 ### 3.默认导出路径:(`/docs/swagger/swagger.json`,`/docs/markdown`)
 ### 4 struct demo
-```
+```go 
 type ReqTest struct {
 	AccessToken string `json:"access_token"`
 	UserName    string `json:"user_name" binding:"required"` // 带校验方式
@@ -184,8 +184,8 @@ type ReqTest struct {
 - [更多 >>>](https://github.com/xxjwxc/gmsec)
 
 ## 三. 支持调用中间件
-- 可通过 `ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{})`设置(全局)
-- 也可以在对象上实现函数(单个类型)
+- (全局模式) 可通过 `ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{})`设置(全局)
+- (单个对象模式) 也可以在对象上实现函数(单个类型)
 ```go
 	// GinBeforeAfter 对象调用前后执行中间件(支持总的跟对象单独添加)
 	type GinBeforeAfter interface {
