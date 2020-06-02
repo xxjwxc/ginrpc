@@ -65,7 +65,7 @@ var (
 	
 	func init() {
 		ginrpc.SetVersion({{.Tm}})
-		{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.RouterPath}}", []string{ {{GetStringList .Methods}} })
+		{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.GenComment.RouterPath}}", []string{ {{GetStringList .GenComment.Methods}} })
 		{{end}} }
 	`
 )

@@ -79,6 +79,10 @@ type Hello struct {
 	Index int
 }
 
+// @Router /api/appuser/userlist [POST]
+func (s *Hello) AppUserList(c *gin.Context) {
+}
+
 // HelloS ...
 // @Router /block [post,get]
 func (s *Hello) HelloS(c *api.Context, req *ReqTest1) {
@@ -106,7 +110,7 @@ func (s *Hello) HelloS3(c *api.Context, req *ReqTest1) (*ReqTest1, error) {
 func TestObj(t *testing.T) {
 	base := New(WithCtx(func(c *gin.Context) interface{} {
 		return api.NewCtx(c)
-	}), WithDebug(false), WithBigCamel(true))
+	}), WithDebug(true), WithBigCamel(true))
 
 	group := gin.Default().Group("/xxjwxc")
 	h := new(Hello)
