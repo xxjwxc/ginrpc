@@ -11,6 +11,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/xxjwxc/public/mylog"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/xxjwxc/public/errors"
@@ -350,13 +352,13 @@ func analysisParm(f *ast.FieldList, imports map[string]string, objPkg string, n 
 					parm.Type = expx.Name
 					parm.Import = objPkg // 本包
 				default:
-					panic(fmt.Sprintf("not find any expx.(%v)", reflect.TypeOf(expx)))
+					mylog.ErrorString(fmt.Sprintf("not find any expx.(%v) [%v]", reflect.TypeOf(expx), objPkg))
 				}
 			case *ast.Ident: // 本文件
 				parm.Type = exp.Name
 				parm.Import = objPkg // 本包
 			default:
-				panic(fmt.Sprintf("not find any exp.(%v)", reflect.TypeOf(d)))
+				mylog.ErrorString(fmt.Sprintf("not find any exp.(%v) [%v]", reflect.TypeOf(d), objPkg))
 			}
 		}
 	}
