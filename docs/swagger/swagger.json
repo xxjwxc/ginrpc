@@ -96,6 +96,45 @@
                     }
                }
           },
+          "/xxjwxc/api/appuser/userlist": {
+               "post": {
+                    "tags": [
+                         "Hello"
+                    ],
+                    "summary": "",
+                    "description": "",
+                    "consumes": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "produces": [
+                         "application/json",
+                         "application/xml"
+                    ],
+                    "parameters": [
+                         {
+                              "in": "body",
+                              "name": "body",
+                              "description": "",
+                              "required": true,
+                              "schema": {
+                                   "$ref": "#/definitions/ReqTest1"
+                              }
+                         }
+                    ],
+                    "responses": {
+                         "400": {
+                              "description": "v"
+                         },
+                         "404": {
+                              "description": "not found"
+                         },
+                         "405": {
+                              "description": "Validation exception"
+                         }
+                    }
+               }
+          },
           "/xxjwxc/block": {
                "get": {
                     "tags": [
