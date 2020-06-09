@@ -48,16 +48,13 @@ func (d *DefaultGinBeforeAfter) GinAfter(req *GinBeforeAfterInfo) bool {
 	begin := (req.Context.Value(timeTrace{})).(time.Time)
 	now := time.Now()
 	mylog.Info(fmt.Sprintf("[middleware] call[%v] [%v]", req.FuncName, now.Sub(begin)))
-	// 设置resp 结果
-	if req.Error == nil {
-		msg := message.GetSuccessMsg()
-		msg.Data = req.Resp
-		req.Resp = msg
-	} else {
-		msg := message.GetErrorStrMsg(req.Error.Error())
-		msg.Data = req.Resp
-		req.Resp = msg
+
+	msg := message.GetSuccessMsg()
+	if req.Error != nil {
+		msg = message.GetErrorStrMsg(req.Error.Error())
 	}
+	msg.Data = req.Resp
+	req.Resp = msg // 设置resp 结果
 	return true
 }
 

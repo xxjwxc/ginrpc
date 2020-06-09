@@ -178,6 +178,8 @@ github.com/xxjwxc/public v0.0.0-20200605161710-72fc28675475 h1:VDny2T9+fQwq9WZkw
 github.com/xxjwxc/public v0.0.0-20200605161710-72fc28675475/go.mod h1:0BFWVHqt7nKW8MtIx7R7bOkoGQFFnKsaJeeVbkzY88E=
 github.com/xxjwxc/public v0.0.0-20200609035341-fcc9bd7f7bd9 h1:oL1xR37Vm5irXTXHSilRYvlPiSZ6nkk+ja+wwsNxZ8E=
 github.com/xxjwxc/public v0.0.0-20200609035341-fcc9bd7f7bd9/go.mod h1:0BFWVHqt7nKW8MtIx7R7bOkoGQFFnKsaJeeVbkzY88E=
+github.com/xxjwxc/public v0.0.0-20200609093834-1a914536a1f2 h1:mS1jc4NFtyt5VVTgrMTaTcNpNzTrjALTnBnK2sTakK4=
+github.com/xxjwxc/public v0.0.0-20200609093834-1a914536a1f2/go.mod h1:0BFWVHqt7nKW8MtIx7R7bOkoGQFFnKsaJeeVbkzY88E=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.uber.org/atomic v1.4.0 h1:cxzIVoETapQEqDhQu3QfnvXAV4AlzcvUCxkVUFw3+EU=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
