@@ -519,7 +519,7 @@ func (b *_Base) register(router gin.IRouter, cList ...interface{}) bool {
 }
 
 func (b *_Base) getDefaultComments(objName, objFunc string, num int) (routerPath string, methods []string) {
-	methods = []string{"get"}
+	methods = []string{"ANY"}
 	if num == 2 { // parm 2 , post default
 		methods = []string{"post"}
 	}
