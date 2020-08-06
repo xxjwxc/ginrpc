@@ -462,9 +462,14 @@ func (b *_Base) tryGenRegister(router gin.IRouter, cList ...interface{}) bool {
 				if _b {
 					if sdl, ok := funMp[method.Name]; ok {
 						gcs, req, resp := b.parserComments(sdl, objName, method.Name, imports, objPkg, num)
-						docReq, docResp := b.parserStruct(req, resp, astPkgs, modPkg, modFile)
+						if b.isOutDoc { // output doc
+							docReq, docResp := b.parserStruct(req, resp, astPkgs, modPkg, modFile)
+							for _, gc := range gcs {
+								doc.AddOne(objName, gc.RouterPath, gc.Methods, gc.Note, docReq, docResp)
+							}
+						}
+
 						for _, gc := range gcs {
-							doc.AddOne(objName, gc.RouterPath, gc.Methods, gc.Note, docReq, docResp)
 							checkOnceAdd(objName+"."+method.Name, gc.RouterPath, gc.Methods)
 						}
 					}
@@ -473,8 +478,10 @@ func (b *_Base) tryGenRegister(router gin.IRouter, cList ...interface{}) bool {
 		}
 	}
 
-	doc.GenSwagger(modFile + "/docs/swagger/")
-	doc.GenMarkdown(modFile + "/docs/markdown/")
+	if b.isOutDoc {
+		doc.GenSwagger(modFile + "/docs/swagger/")
+		doc.GenMarkdown(modFile + "/docs/markdown/")
+	}
 	genOutPut(b.outPath, modFile) // generate code
 	return true
 }

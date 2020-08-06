@@ -160,6 +160,8 @@ func main() {
 	ginrpc.WithCtx ： Set custom context
 
 	ginrpc.WithDebug(true) : Set debug mode
+	
+	ginrpc.WithOutDoc(true) : output markdown/swagger api doc
 
 	ginrpc.WithBigCamel(true) : Set big camel standard (false is web mode, _, lowercase)
 
@@ -178,6 +180,10 @@ func main() {
   ```
 
 ## 二. swagger/markdown/mindoc Document generation description
+
+```
+	ginrpc.WithOutDoc(true) : output markdown/swagger
+```
 
 ### 1.For object registration 'ginrpc. Register' mode, document export is supported
 ### 2.Export supports annotation routing, Parameter annotation and default value (` tag '. ` default')

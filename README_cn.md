@@ -158,6 +158,8 @@ _ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
 
 	ginrpc.WithDebug(true) : 设置debug模式
 
+	ginrpc.WithOutDoc(true) : 设置输出 markdown/swagger 接口文档
+
 	ginrpc.WithBigCamel(true) : 设置大驼峰标准(false 为web模式，_,小写)
 	
 	ginrpc.WithBeforeAfter(&ginrpc.DefaultGinBeforeAfter{}) : 设置调用前后执行中间件
@@ -169,6 +171,11 @@ _ "[mod]/routers" // debug模式需要添加[mod]/routers 注册注解路由
 ### 3. 支持绑定grpc函数: [gmsec](https://github.com/gmsec/gmsec)
 
 ## 二. swagger/markdown/mindoc 文档生成说明
+
+
+```
+	ginrpc.WithOutDoc(true) : 设置输出 markdown/swagger 接口文档
+```
 
 ### 1.对于对象注册`ginrpc.Register`模式,支持文档导出
 ### 2.导出支持注解路由,支持参数注释,支持默认值(`tag`.`default`)

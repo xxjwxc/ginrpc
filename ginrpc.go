@@ -18,6 +18,7 @@ type _Base struct {
 	apiType     reflect.Type
 	outPath     string // output path.输出目录
 	beforeAfter GinBeforeAfter
+	isOutDoc    bool
 }
 
 // Option overrides behavior of Connect.
@@ -62,6 +63,13 @@ func WithBigCamel(b bool) Option {
 	})
 }
 
+// WithOutDoc set is out doc.是否输出文档
+func WithOutDoc(b bool) Option {
+	return optionFunc(func(o *_Base) {
+		o.isOutDoc = b
+	})
+}
+
 // WithBeforeAfter set before and after call.设置对象调用前后执行中间件
 func WithBeforeAfter(beforeAfter GinBeforeAfter) Option {
 	return optionFunc(func(o *_Base) {
@@ -92,6 +100,11 @@ func New(opts ...Option) *_Base {
 // Dev set build is development
 func (b *_Base) Dev(isDev bool) {
 	b.isDev = isDev
+}
+
+// OutDoc set if out doc. 设置是否输出接口文档
+func (b *_Base) OutDoc(isOutDoc bool) {
+	b.isOutDoc = isOutDoc
 }
 
 // Model use custom context

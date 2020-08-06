@@ -169,14 +169,9 @@ github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLY
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/xxjwxc/gowp v0.0.0-20200603130651-4d7368b0e285/go.mod h1:yJ/fY5BorWARfDDsxBU/MyQTHc5MVyNcqBQQYD6MN0k=
-github.com/xxjwxc/public v0.0.0-20200603115833-341beff27850 h1:UCW8LJHTCOlkQt1+KUovAX1T7jAaUZch95yrIfKfZuU=
 github.com/xxjwxc/public v0.0.0-20200603115833-341beff27850/go.mod h1:fp3M+FEQrCgWD1fZ/PLwZkCTglf086OEhC9LcydAUnc=
-github.com/xxjwxc/public v0.0.0-20200624081057-e7dc0aa6e887 h1:zgSB9vgUwYklK7O+Jms1wsb0XrobRF6Krg6cqSnKDF4=
-github.com/xxjwxc/public v0.0.0-20200624081057-e7dc0aa6e887/go.mod h1:0BFWVHqt7nKW8MtIx7R7bOkoGQFFnKsaJeeVbkzY88E=
-github.com/xxjwxc/public v0.0.0-20200710160137-ccf3e4f07a03 h1:jd3Eq8PGmwrmlrhMPpmqfGyiC2qFVBRA38n3HFFv9+Y=
-github.com/xxjwxc/public v0.0.0-20200710160137-ccf3e4f07a03/go.mod h1:0BFWVHqt7nKW8MtIx7R7bOkoGQFFnKsaJeeVbkzY88E=
-github.com/xxjwxc/public v0.0.0-20200806165443-643811bf4a0e h1:q4/pr6g9tak3UiL3q43YIRxSTk4oVrBebYbkFIZegPY=
-github.com/xxjwxc/public v0.0.0-20200806165443-643811bf4a0e/go.mod h1:0BFWVHqt7nKW8MtIx7R7bOkoGQFFnKsaJeeVbkzY88E=
+github.com/xxjwxc/public v0.0.0-20200806170246-c98b0706a117 h1:b0n+CBXKl6rxu+v6v2kwVhBn2sJgnugzaTJ/FIPY/dw=
+github.com/xxjwxc/public v0.0.0-20200806170246-c98b0706a117/go.mod h1:0BFWVHqt7nKW8MtIx7R7bOkoGQFFnKsaJeeVbkzY88E=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.uber.org/atomic v1.4.0 h1:cxzIVoETapQEqDhQu3QfnvXAV4AlzcvUCxkVUFw3+EU=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
