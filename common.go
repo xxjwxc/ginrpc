@@ -71,6 +71,11 @@ func (b *_Base) handlerFuncObj(tvl, obj reflect.Value, methodName string) gin.Ha
 		}
 
 		return func(c *gin.Context) {
+			defer func() {
+				if err := recover(); err != nil {
+					b.recoverErrorFunc(err)
+				}
+			}()
 			tvl.Call([]reflect.Value{obj, reflect.ValueOf(apiFun(c))})
 		}
 	}
@@ -154,6 +159,12 @@ func (b *_Base) getCallFunc3(tvl reflect.Value) (func(*gin.Context), error) {
 	}
 
 	return func(c *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				b.recoverErrorFunc(err)
+			}
+		}()
+
 		req := reflect.New(reqType)
 		if !reqIsValue {
 			req = reflect.New(reqType.Elem())
@@ -224,6 +235,12 @@ func (b *_Base) getCallObj3(tvl, obj reflect.Value, methodName string) (func(*gi
 	}
 
 	return func(c *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				b.recoverErrorFunc(err)
+			}
+		}()
+
 		req := reflect.New(reqType)
 		if !reqIsValue {
 			req = reflect.New(reqType.Elem())

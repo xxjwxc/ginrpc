@@ -5,6 +5,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/xxjwxc/public/mylog"
+
 	"github.com/gin-gonic/gin"
 	"github.com/xxjwxc/ginrpc/api"
 	"github.com/xxjwxc/public/errors"
@@ -12,13 +14,14 @@ import (
 
 // _Base base struct
 type _Base struct {
-	isBigCamel  bool // big camel style.大驼峰命名规则
-	isDev       bool // if is development
-	apiFun      NewAPIFunc
-	apiType     reflect.Type
-	outPath     string // output path.输出目录
-	beforeAfter GinBeforeAfter
-	isOutDoc    bool
+	isBigCamel       bool // big camel style.大驼峰命名规则
+	isDev            bool // if is development
+	apiFun           NewAPIFunc
+	apiType          reflect.Type
+	outPath          string // output path.输出目录
+	beforeAfter      GinBeforeAfter
+	isOutDoc         bool
+	recoverErrorFunc RecoverErrorFunc
 }
 
 // Option overrides behavior of Connect.
@@ -82,6 +85,9 @@ func Default() *_Base {
 	b := new(_Base)
 	b.Model(api.NewAPIFunc)
 	b.Dev(true)
+	b.SetRecover(func(err interface{}) {
+		mylog.Error(err)
+	})
 
 	return b
 }
@@ -94,12 +100,20 @@ func New(opts ...Option) *_Base {
 		o.apply(b)
 	}
 
+	b.SetRecover(func(err interface{}) {
+		mylog.Error(err)
+	})
 	return b
 }
 
 // Dev set build is development
 func (b *_Base) Dev(isDev bool) {
 	b.isDev = isDev
+}
+
+// SetRecover set recover err call
+func (b *_Base) SetRecover(errfun func(interface{})) {
+	b.recoverErrorFunc = errfun
 }
 
 // OutDoc set if out doc. 设置是否输出接口文档
@@ -189,6 +203,11 @@ func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取
 		if ctxType == b.apiType {
 			method := reflect.ValueOf(handlerFunc)
 			return func(c *gin.Context) {
+				defer func() {
+					if err := recover(); err != nil {
+						b.recoverErrorFunc(err)
+					}
+				}()
 				method.Call([]reflect.Value{reflect.ValueOf(b.apiFun(c))})
 			}
 		}

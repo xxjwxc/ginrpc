@@ -21,6 +21,9 @@ func _fun3(*api.Context, interface{}) {}
 // NewAPIFunc Custom context support
 type NewAPIFunc func(*gin.Context) interface{}
 
+// RecoverErrorFunc recover 错误设置
+type RecoverErrorFunc func(interface{})
+
 // parmInfo 参数类型描述
 type parmInfo struct {
 	Pkg    string // 包名
