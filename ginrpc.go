@@ -139,7 +139,7 @@ func (b *_Base) Model(middleware NewAPIFunc) *_Base {
 }
 
 // Register Registered by struct object,[prepath + bojname.]
-func (b *_Base) Register(router gin.IRouter, cList ...interface{}) bool {
+func (b *_Base) Register(router gin.IRoutes, cList ...interface{}) bool {
 	if b.isDev {
 		b.tryGenRegister(router, cList...)
 	}
@@ -148,7 +148,7 @@ func (b *_Base) Register(router gin.IRouter, cList ...interface{}) bool {
 }
 
 // RegisterHandlerFunc Multiple registration methods.获取并过滤要绑定的参数
-func (b *_Base) RegisterHandlerFunc(router gin.IRouter, httpMethod []string, relativePath string, handlerFuncs ...interface{}) error {
+func (b *_Base) RegisterHandlerFunc(router gin.IRoutes, httpMethod []string, relativePath string, handlerFuncs ...interface{}) error {
 	list := make([]gin.HandlerFunc, 0, len(handlerFuncs))
 	for _, call := range handlerFuncs {
 		list = append(list, b.HandlerFunc(call))

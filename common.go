@@ -444,7 +444,7 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports
 }
 
 // tryGenRegister gen out the Registered config info  by struct object,[prepath + bojname.]
-func (b *_Base) tryGenRegister(router gin.IRouter, cList ...interface{}) bool {
+func (b *_Base) tryGenRegister(router gin.IRoutes, cList ...interface{}) bool {
 	modPkg, modFile, isFind := myast.GetModuleInfo(2)
 	if !isFind {
 		return false
@@ -503,7 +503,7 @@ func (b *_Base) tryGenRegister(router gin.IRouter, cList ...interface{}) bool {
 	return true
 }
 
-func (b *_Base) BasePath(router gin.IRouter) string {
+func (b *_Base) BasePath(router gin.IRoutes) string {
 	switch r := router.(type) {
 	case *gin.RouterGroup:
 		return r.BasePath()
@@ -514,7 +514,7 @@ func (b *_Base) BasePath(router gin.IRouter) string {
 }
 
 // register Registered by struct object,[prepath + bojname.]
-func (b *_Base) register(router gin.IRouter, cList ...interface{}) bool {
+func (b *_Base) register(router gin.IRoutes, cList ...interface{}) bool {
 	// groupPath := b.BasePath(router)
 	mp := getInfo()
 	for _, c := range cList {
@@ -558,7 +558,7 @@ func (b *_Base) getDefaultComments(objName, objFunc string, num int) (routerPath
 }
 
 // registerHandlerObj Multiple registration methods.获取并过滤要绑定的参数
-func (b *_Base) registerHandlerObj(router gin.IRouter, httpMethod []string, relativePath, methodName string, tvl, obj reflect.Value) error {
+func (b *_Base) registerHandlerObj(router gin.IRoutes, httpMethod []string, relativePath, methodName string, tvl, obj reflect.Value) error {
 	call := b.handlerFuncObj(tvl, obj, methodName)
 
 	for _, v := range httpMethod {
