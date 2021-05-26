@@ -5,7 +5,9 @@ go 1.12
 require (
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/xxjwxc/public v0.0.0-20210518123934-6cc0965f0bc5
+	github.com/xxjwxc/public v0.0.0-20210526103110-123189778020
+	google.golang.org/genproto v0.0.0-20210207032614-bba0dbe2a9ea // indirect
+	google.golang.org/grpc v1.29.1
 )
 
 // replace github.com/xxjwxc/public => ../public

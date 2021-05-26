@@ -21,6 +21,7 @@ import (
 	"github.com/xxjwxc/public/mybigcamel"
 	"github.com/xxjwxc/public/mydoc"
 	"github.com/xxjwxc/public/myreflect"
+	"google.golang.org/grpc/status"
 )
 
 func (b *_Base) parseReqResp(typ reflect.Type, isObj bool) (reflect.Type, reflect.Type) {
@@ -177,15 +178,21 @@ func (b *_Base) getCallFunc3(tvl reflect.Value) (func(*gin.Context), error) {
 		if reqIsValue {
 			req = req.Elem()
 		}
-		var returnValues []reflect.Value
-		returnValues = tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req})
-
+		// var returnValues []reflect.Value
+		returnValues := tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req})
 		if returnValues != nil {
 			obj := returnValues[0].Interface()
 			rerr := returnValues[1].Interface()
 			if rerr != nil {
+				err := rerr.(error)
 				msg := message.GetErrorMsg(message.InValidOp)
-				msg.Error = rerr.(error).Error()
+				gerr := status.Convert(err)
+				if gerr != nil {
+					msg.Code = int(gerr.Code())
+					msg.Error = gerr.Message()
+				} else {
+					msg.Error = err.Error()
+				}
 				c.JSON(http.StatusBadRequest, msg)
 			} else {
 				c.JSON(http.StatusOK, obj)
