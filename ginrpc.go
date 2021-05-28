@@ -22,6 +22,7 @@ type _Base struct {
 	beforeAfter      GinBeforeAfter
 	isOutDoc         bool
 	recoverErrorFunc RecoverErrorFunc
+	importFile       map[string]string // 自定义包文件
 }
 
 // Option overrides behavior of Connect.
@@ -59,6 +60,13 @@ func WithDebug(b bool) Option {
 	})
 }
 
+// WithImportFile 添加自定义import文件列表
+func WithImportFile(k, v string) Option {
+	return optionFunc(func(o *_Base) {
+		o.importFile[k] = v
+	})
+}
+
 // WithBigCamel set build is BigCamel.是否大驼峰模式
 func WithBigCamel(b bool) Option {
 	return optionFunc(func(o *_Base) {
@@ -83,6 +91,7 @@ func WithBeforeAfter(beforeAfter GinBeforeAfter) Option {
 // Default new op obj
 func Default() *_Base {
 	b := new(_Base)
+	b.importFile = make(map[string]string)
 	b.Model(api.NewAPIFunc)
 	b.Dev(true)
 	b.SetRecover(func(err interface{}) {
