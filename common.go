@@ -345,9 +345,9 @@ func (b *_Base) parserStruct(req, resp *parmInfo, astPkg *ast.Package, modPkg, m
 	if resp != nil {
 		tmp := astPkg
 		if len(resp.Pkg) > 0 {
-			objFile := b.importFile[req.Import]
+			objFile := b.importFile[resp.Import]
 			if len(objFile) == 0 {
-				objFile = myast.EvalSymlinks(modPkg, modFile, req.Import)
+				objFile = myast.EvalSymlinks(modPkg, modFile, resp.Import)
 			}
 			tmp, _ = myast.GetAstPkgs(resp.Pkg, objFile) // get ast trees.
 		}
