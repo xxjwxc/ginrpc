@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/xxjwxc/public/myast"
 	"github.com/xxjwxc/public/mylog"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,6 @@ type _Base struct {
 	beforeAfter      GinBeforeAfter
 	isOutDoc         bool
 	recoverErrorFunc RecoverErrorFunc
-	importFile       map[string]string // 自定义包文件
 }
 
 // Option overrides behavior of Connect.
@@ -63,7 +63,7 @@ func WithDebug(b bool) Option {
 // WithImportFile 添加自定义import文件列表
 func WithImportFile(k, v string) Option {
 	return optionFunc(func(o *_Base) {
-		o.importFile[k] = v
+		myast.AddImportFile(k, v)
 	})
 }
 
@@ -91,7 +91,6 @@ func WithBeforeAfter(beforeAfter GinBeforeAfter) Option {
 // Default new op obj
 func Default() *_Base {
 	b := new(_Base)
-	b.importFile = make(map[string]string)
 	b.Model(api.NewAPIFunc)
 	b.Dev(true)
 	b.SetRecover(func(err interface{}) {

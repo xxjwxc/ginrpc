@@ -332,11 +332,7 @@ func (b *_Base) parserStruct(req, resp *parmInfo, astPkg *ast.Package, modPkg, m
 	if req != nil {
 		tmp := astPkg
 		if len(req.Pkg) > 0 {
-			objFile := b.importFile[req.Import]
-			if len(objFile) == 0 {
-				objFile = myast.EvalSymlinks(modPkg, modFile, req.Import)
-			}
-
+			objFile := myast.EvalSymlinks(modPkg, modFile, req.Import)
 			tmp, _ = myast.GetAstPkgs(req.Pkg, objFile) // get ast trees.
 		}
 		r = ant.ParserStruct(tmp, req.Type)
@@ -345,10 +341,7 @@ func (b *_Base) parserStruct(req, resp *parmInfo, astPkg *ast.Package, modPkg, m
 	if resp != nil {
 		tmp := astPkg
 		if len(resp.Pkg) > 0 {
-			objFile := b.importFile[resp.Import]
-			if len(objFile) == 0 {
-				objFile = myast.EvalSymlinks(modPkg, modFile, resp.Import)
-			}
+			objFile := myast.EvalSymlinks(modPkg, modFile, resp.Import)
 			tmp, _ = myast.GetAstPkgs(resp.Pkg, objFile) // get ast trees.
 		}
 		p = ant.ParserStruct(tmp, resp.Type)
