@@ -200,8 +200,6 @@ github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/xxjwxc/gowp v0.0.0-20200603130651-4d7368b0e285/go.mod h1:yJ/fY5BorWARfDDsxBU/MyQTHc5MVyNcqBQQYD6MN0k=
 github.com/xxjwxc/public v0.0.0-20200603115833-341beff27850/go.mod h1:fp3M+FEQrCgWD1fZ/PLwZkCTglf086OEhC9LcydAUnc=
-github.com/xxjwxc/public v0.0.0-20210528122519-9c0267a26e38 h1:3aLc/rYIu1bFHnsnnXKanqQaG9Z5qfwQslCOx7DtGBU=
-github.com/xxjwxc/public v0.0.0-20210528122519-9c0267a26e38/go.mod h1:kNBfZ2iA/e+e3yoD5Zm81BgAHNP5htgZf5XsWiXpCTU=
 github.com/xxjwxc/public v0.0.0-20210604020721-3cc06f1e88c0 h1:bFzoSC9kz1gv7Vh7Pt0Z0XIjSgaC7zRfhXBL4PfAhng=
 github.com/xxjwxc/public v0.0.0-20210604020721-3cc06f1e88c0/go.mod h1:kNBfZ2iA/e+e3yoD5Zm81BgAHNP5htgZf5XsWiXpCTU=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
