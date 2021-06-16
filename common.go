@@ -24,10 +24,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (b *_Base) parseReqResp(typ reflect.Type, isObj bool) (reflect.Type, reflect.Type) {
-	return nil, nil
-}
-
 // checkHandlerFunc Judge whether to match rules
 func (b *_Base) checkHandlerFunc(typ reflect.Type, isObj bool) (int, bool) { // 判断是否匹配规则,返回参数个数
 	offset := 0
@@ -267,8 +263,8 @@ func (b *_Base) getCallObj3(tvl, obj reflect.Value, methodName string) (func(*gi
 			return
 		}
 
-		var returnValues []reflect.Value
-		returnValues = tvl.Call([]reflect.Value{obj, reflect.ValueOf(apiFun(c)), req})
+		// var returnValues []reflect.Value
+		returnValues := tvl.Call([]reflect.Value{obj, reflect.ValueOf(apiFun(c)), req})
 
 		if returnValues != nil {
 			bainfo.Resp = returnValues[0].Interface()
@@ -320,11 +316,14 @@ func (b *_Base) handErrorString(c *gin.Context, req reflect.Value, err error) {
 	msg := message.GetErrorMsg(message.ParameterInvalid)
 	msg.Error = fmt.Sprintf("req param : %v", strings.Join(fields, ";"))
 	c.JSON(http.StatusBadRequest, msg)
-	return
 }
 
 func (b *_Base) unmarshal(c *gin.Context, v interface{}) error {
-	return c.ShouldBind(v)
+	err := c.ShouldBind(v)
+	if err != nil || strings.EqualFold(c.Request.Method, "get") { // get 模式 补刀json
+		err = mapJson(v, c.Request.Form)
+	}
+	return err
 }
 
 func (b *_Base) parserStruct(req, resp *parmInfo, astPkg *ast.Package, modPkg, modFile string) (r, p *mydoc.StructInfo) {
@@ -424,9 +423,10 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports
 						gc.Methods = strings.Split(methods, ",")
 					}
 					gcs = append(gcs, gc)
-				} else {
-					// return nil, errors.New("Router information is missing")
 				}
+				// else {
+				// return nil, errors.New("Router information is missing")
+				// }
 			} else if strings.HasPrefix(t, objFunc) { // find note
 				t = strings.TrimSpace(strings.TrimPrefix(t, objFunc))
 				note += t
