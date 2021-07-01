@@ -102,6 +102,7 @@ func TestFun6(c *gin.Context, req ReqTest) (*ReqTest, error) {
 	return &req, nil
 }
 
+
 func main() {
 	// swagger
 	myswagger.SetHost("https://localhost:8080")
@@ -141,6 +142,7 @@ func main() {
 [post,get] method 调用方式
 
  ```
+- `@Router - [-]` 表示忽略
 
 #### 说明:如果对象函数中不加注解路由，系统会默认添加注解路由。post方式：带req(2个参数(ctx,req))，get方式为一个参数(ctx)
 

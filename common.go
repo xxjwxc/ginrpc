@@ -406,6 +406,7 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports
 	var gcs []genComment
 	req := analysisParm(f.Type.Params, imports, objPkg, 1)
 	resp := analysisParm(f.Type.Results, imports, objPkg, 0)
+	ignore := false
 
 	if f.Doc != nil {
 		for _, c := range f.Doc.List {
@@ -417,12 +418,17 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports
 				if len(matches) == 3 {
 					gc.RouterPath = matches[1]
 					methods := matches[2]
-					if methods == "" {
-						gc.Methods = []string{"get"}
+					if methods != "-" {
+						if methods == "" {
+							gc.Methods = []string{"get"}
+						} else {
+							gc.Methods = strings.Split(methods, ",")
+						}
+						gcs = append(gcs, gc)
 					} else {
-						gc.Methods = strings.Split(methods, ",")
+						ignore = true
 					}
-					gcs = append(gcs, gc)
+
 				}
 				// else {
 				// return nil, errors.New("Router information is missing")
@@ -436,7 +442,7 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports
 	}
 
 	//defalt
-	if len(gcs) == 0 {
+	if len(gcs) == 0 && !ignore {
 		gc := genComment{}
 		gc.RouterPath, gc.Methods = b.getDefaultComments(objName, objFunc, num)
 		gcs = append(gcs, gc)

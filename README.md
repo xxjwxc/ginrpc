@@ -138,6 +138,8 @@ func main() {
 
  ```
 
+ - `@Router - [-]` indicates ignore
+
  #### Note: if there is no annotation route in the object function, the system will add annotation route by default. Post mode: with req (2 parameters (CTX, req)), get mode is a parameter (CTX)
 
 
