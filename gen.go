@@ -2,6 +2,7 @@ package ginrpc
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -49,6 +50,10 @@ func SetVersion(tm int64) {
 	_mu.Lock()
 	defer _mu.Unlock()
 	_genInfo.Tm = tm
+}
+
+func GetVersion() string {
+	return fmt.Sprintf("%v", _genInfo.Tm)
 }
 
 func checkOnceAdd(handFunName, routerPath string, methods []string) {
