@@ -495,7 +495,7 @@ func (b *_Base) tryGenRegister(router gin.IRoutes, cList ...interface{}) bool {
 						if b.isOutDoc { // output doc
 							docReq, docResp := b.parserStruct(req, resp, astPkgs, modPkg, modFile)
 							for _, gc := range gcs {
-								doc.AddOne(objName, gc.RouterPath, gc.Methods, gc.Note, docReq, docResp)
+								doc.AddOne(objName, method.Name, gc.RouterPath, gc.Methods, gc.Note, docReq, docResp)
 							}
 						}
 
