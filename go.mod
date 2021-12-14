@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/goccy/go-json v0.7.0
 	github.com/json-iterator/go v1.1.9
-	github.com/xxjwxc/public v0.0.0-20211105043208-23a98ef85b9f
+	github.com/xxjwxc/public v0.0.0-20211214093440-ccdc568f01f7
 	google.golang.org/genproto v0.0.0-20210207032614-bba0dbe2a9ea // indirect
 	google.golang.org/grpc v1.29.1
 )
