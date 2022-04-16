@@ -479,7 +479,7 @@ func (b *_Base) tryGenRegister(router gin.IRoutes, cList ...interface{}) bool {
 
 		astPkgs, _b := myast.GetAstPkgs(objPkg, objFile) // get ast trees.
 		if _b {
-			imports := myast.AnalysisImport(astPkgs)
+			// imports := myast.AnalysisImport(astPkgs)
 			funMp := myast.GetObjFunMp(astPkgs, objName)
 			// ast.Print(token.NewFileSet(), astPkgs)
 			// fmt.Println(b)
@@ -490,8 +490,8 @@ func (b *_Base) tryGenRegister(router gin.IRoutes, cList ...interface{}) bool {
 				method := refTyp.Method(m)
 				num, _b := b.checkHandlerFunc(method.Type /*.Interface()*/, true)
 				if _b {
-					if sdl, ok := funMp[method.Name]; ok {
-						gcs, req, resp := b.parserComments(sdl, objName, method.Name, imports, objPkg, num)
+					if fp, ok := funMp[method.Name]; ok {
+						gcs, req, resp := b.parserComments(fp.AstFunc, objName, method.Name, fp.Imports, objPkg, num)
 						if b.isOutDoc { // output doc
 							docReq, docResp := b.parserStruct(req, resp, astPkgs, modPkg, modFile)
 							for _, gc := range gcs {
