@@ -3,7 +3,7 @@ module github.com/xxjwxc/ginrpc
 go 1.12
 
 require (
-	github.com/gin-gonic/gin v1.7.2
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/goccy/go-json v0.7.0
 	github.com/gookit/color v1.5.1 // indirect
