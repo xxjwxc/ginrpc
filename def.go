@@ -33,9 +33,16 @@ type parmInfo struct {
 
 // store the comment for the controller method. 生成注解路由
 type genComment struct {
-	RouterPath string
-	Note       string // 注释
-	Methods    []string
+	RouterPath     string
+	Note           string // 注释
+	Methods        []string
+	ThirdPartyList []GenThirdParty // 第三方注解路由
+}
+
+type GenThirdParty struct {
+	Name string
+	Data string
+	Note string // 注释
 }
 
 // router style list.路由规则列表
@@ -68,7 +75,7 @@ var (
 	
 	func init() {
 		ginrpc.SetVersion({{.Tm}})
-		{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.GenComment.RouterPath}}", []string{ {{GetStringList .GenComment.Methods}} })
+		{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.GenComment.RouterPath}}", []string{ {{GetStringList .GenComment.Methods}} },[]ginrpc.GenThirdParty{ {{GetPartyList .GenComment.ThirdPartyList}} },{{GetNote .GenComment.Note}})
 		{{end}} }
 	`
 )

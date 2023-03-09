@@ -10,12 +10,12 @@ import (
 )
 
 func TestModelObj(t *testing.T) {
-	// base := New(WithCtx(func(c *gin.Context) interface{} {
-	// 	return api.NewCtx(c)
-	// }))
+	base := New(WithCtx(func(c *gin.Context) interface{} {
+		return api.NewCtx(c)
+	}))
 
-	// router := gin.Default()
-	// base.Register(router, new(Hello))
+	router := gin.Default()
+	base.Register(router, new(Hello))
 }
 
 func TestModelFunc(t *testing.T) {
@@ -79,7 +79,7 @@ type Hello struct {
 	Index int
 }
 
-// @Router /api/appuser/userlist [POST]
+// @Router /api/appuser/userlist [POST][router aaa,bbb,ccc]
 func (s *Hello) AppUserList(c *gin.Context) {
 }
 

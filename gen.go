@@ -12,6 +12,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/xxjwxc/public/message"
 	"github.com/xxjwxc/public/serializing"
 	"github.com/xxjwxc/public/tools"
 )
@@ -24,8 +25,10 @@ var _mu sync.Mutex // protects the serviceMap
 var _once sync.Once
 var _genInfo genInfo
 var _genInfoCnf genInfo
+var _genMap map[string]GenThirdParty
 
 func init() {
+	_genMap = make(map[string]GenThirdParty)
 	data, err := ioutil.ReadFile(path.Join(tools.GetCurrentDirectory(), getRouter))
 	if err == nil {
 		serializing.Decode(data, &_genInfoCnf) // gob de serialize 反序列化
@@ -33,16 +36,42 @@ func init() {
 }
 
 // AddGenOne add one to base case
-func AddGenOne(handFunName, routerPath string, methods []string) {
+func AddGenOne(handFunName, routerPath string, methods []string, thirdParty []GenThirdParty, note string) {
 	_mu.Lock()
 	defer _mu.Unlock()
 	_genInfo.List = append(_genInfo.List, genRouterInfo{
 		HandFunName: handFunName,
 		GenComment: genComment{
-			RouterPath: routerPath,
-			Methods:    methods,
+			Note:           note,
+			RouterPath:     routerPath,
+			Methods:        methods,
+			ThirdPartyList: thirdParty,
 		},
 	})
+	for _, v := range thirdParty {
+		_genMap[fmt.Sprintf("%v-%v", routerPath, v.Name)] = GenThirdParty{
+			Note: note,
+			Name: v.Name,
+			Data: v.Data,
+		}
+	}
+}
+
+func GetThirdParty(routerPath, thirdParty string) (*GenThirdParty, error) {
+	if _, ok := _genMap[fmt.Sprintf("%v-%v", routerPath, thirdParty)]; ok {
+		tmp := _genMap[routerPath]
+		return &GenThirdParty{
+			Name: tmp.Name,
+			Note: tmp.Note,
+			Data: tmp.Data,
+		}, nil
+	}
+	return nil, message.GetError(message.NotFindError)
+}
+func GetAllRouter() []genRouterInfo {
+	_mu.Lock()
+	defer _mu.Unlock()
+	return _genInfo.List
 }
 
 // SetVersion user timestamp to replace version
@@ -56,7 +85,7 @@ func GetVersion() string {
 	return fmt.Sprintf("%v", _genInfo.Tm)
 }
 
-func checkOnceAdd(handFunName, routerPath string, methods []string) {
+func checkOnceAdd(handFunName, routerPath string, methods []string, thirdParty []GenThirdParty, note string) {
 	_once.Do(func() {
 		_mu.Lock()
 		defer _mu.Unlock()
@@ -64,12 +93,25 @@ func checkOnceAdd(handFunName, routerPath string, methods []string) {
 		_genInfo.List = []genRouterInfo{} // reset
 	})
 
-	AddGenOne(handFunName, routerPath, methods)
+	AddGenOne(handFunName, routerPath, methods, thirdParty, note)
 }
 
 // GetStringList format string
 func GetStringList(list []string) string {
 	return `"` + strings.Join(list, `","`) + `"`
+}
+
+// GetPartyList format string
+func GetPartyList(list []GenThirdParty) string {
+	var tmp []string
+	for _, v := range list {
+		tmp = append(tmp, fmt.Sprintf(`{Name: "%v", Data: "%v"}`, v.Name, v.Data))
+	}
+	return strings.Join(tmp, ",")
+}
+
+func GetNote(note string) string {
+	return fmt.Sprintf("`%v`", note)
 }
 
 func genOutPut(outDir, modFile string) {
@@ -106,7 +148,7 @@ func genCode(outDir, modFile string) bool {
 		PkgName: pkgName,
 	}
 
-	tmpl, err := template.New("gen_out").Funcs(template.FuncMap{"GetStringList": GetStringList}).Parse(genTemp)
+	tmpl, err := template.New("gen_out").Funcs(template.FuncMap{"GetStringList": GetStringList, "GetPartyList": GetPartyList, "GetNote": GetNote}).Parse(genTemp)
 	if err != nil {
 		panic(err)
 	}

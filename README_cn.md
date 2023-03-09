@@ -205,6 +205,19 @@ type ReqTest struct {
 	}
 ```
 
+## 支持第三方路由导出
+```go
+	// Hello 带注解路由(参考beego形式)
+	// @Router /block [post,get][thirdParty aaa,bbb]
+	func (s *Hello) Hello(c *api.Context, req *ReqTest) {
+		fmt.Println(req)
+		c.WriteJSON(req) // 返回结果
+	}
+	ctx := api.NewAPIFunc(c).(*api.Context)
+	router := ctx.GetRouter()
+	thirdParty, _ := ginrpc.GetThirdParty(router, "thirdParty")
+```
+
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/xxjwxc/ginrpc.svg)](https://starchart.cc/xxjwxc/ginrpc)

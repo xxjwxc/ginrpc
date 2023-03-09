@@ -350,6 +350,7 @@ func (b *_Base) parserStruct(req, resp *parmInfo, astPkg *ast.Package, modPkg, m
 }
 
 var routeRegex = regexp.MustCompile(`@Router\s+(\S+)(?:\s+\[(\S+)\])?`)
+var routeRegexParty = regexp.MustCompile(`\[(\S+ \S+)\]`)
 
 func analysisParm(f *ast.FieldList, imports map[string]string, objPkg string, n int) (parm *parmInfo) {
 	if f != nil {
@@ -424,11 +425,28 @@ func (b *_Base) parserComments(f *ast.FuncDecl, objName, objFunc string, imports
 						} else {
 							gc.Methods = strings.Split(methods, ",")
 						}
+						// deal 3td party
+						for {
+							t = t[len(matches[0]):]
+							if len(t) > 2 {
+								matches = routeRegexParty.FindStringSubmatch(t)
+								if len(matches) == 2 {
+									tmp := strings.Split(matches[1], " ")
+									if len(tmp) == 2 {
+										gc.ThirdPartyList = append(gc.ThirdPartyList, GenThirdParty{
+											Name: tmp[0],
+											Data: tmp[1],
+										})
+									}
+								}
+							} else {
+								break
+							}
+						}
 						gcs = append(gcs, gc)
 					} else {
 						ignore = true
 					}
-
 				}
 				// else {
 				// return nil, errors.New("Router information is missing")
@@ -471,6 +489,8 @@ func (b *_Base) tryGenRegister(router gin.IRoutes, cList ...interface{}) bool {
 		t := reflect.Indirect(refVal).Type()
 		objPkg := t.PkgPath()
 		objName := t.Name()
+
+		// now := time.Now()
 		// fmt.Println(objPkg, objName)
 
 		// find path
@@ -488,21 +508,26 @@ func (b *_Base) tryGenRegister(router gin.IRoutes, cList ...interface{}) bool {
 			// Install the methods
 			for m := 0; m < refTyp.NumMethod(); m++ {
 				method := refTyp.Method(m)
+
 				num, _b := b.checkHandlerFunc(method.Type /*.Interface()*/, true)
 				if _b {
 					if fp, ok := funMp[method.Name]; ok {
 						gcs, req, resp := b.parserComments(fp.AstFunc, objName, method.Name, fp.Imports, objPkg, num)
 						if b.isOutDoc { // output doc
+							// now := time.Now()
+							// fmt.Println(objName + "." + method.Name)
 							docReq, docResp := b.parserStruct(req, resp, astPkgs, modPkg, modFile)
+							// fmt.Println("----------", time.Since(now))
 							for _, gc := range gcs {
 								doc.AddOne(objName, method.Name, gc.RouterPath, gc.Methods, gc.Note, docReq, docResp)
 							}
 						}
 
 						for _, gc := range gcs {
-							checkOnceAdd(objName+"."+method.Name, gc.RouterPath, gc.Methods)
+							checkOnceAdd(objName+"."+method.Name, gc.RouterPath, gc.Methods, gc.ThirdPartyList, gc.Note)
 						}
 					}
+
 				}
 			}
 		}
