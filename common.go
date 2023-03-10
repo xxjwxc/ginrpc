@@ -98,8 +98,13 @@ func (b *_Base) beforCall(c *gin.Context, tvl, obj reflect.Value, req interface{
 	if bfobj, ok := obj.Interface().(GinBeforeAfter); ok { // 本类型
 		is = bfobj.GinBefore(info)
 	}
-	if is && b.beforeAfter != nil {
-		is = b.beforeAfter.GinBefore(info)
+	if is && len(b.beforeAfter) > 0 {
+		for _, call := range b.beforeAfter {
+			is = call.GinBefore(info)
+			if !is {
+				break
+			}
+		}
 	}
 	return info, is
 }
@@ -109,8 +114,13 @@ func (b *_Base) afterCall(info *GinBeforeAfterInfo, obj reflect.Value) bool {
 	if bfobj, ok := obj.Interface().(GinBeforeAfter); ok { // 本类型
 		is = bfobj.GinAfter(info)
 	}
-	if is && b.beforeAfter != nil {
-		is = b.beforeAfter.GinAfter(info)
+	if is && len(b.beforeAfter) > 0 {
+		for _, call := range b.beforeAfter {
+			is = call.GinAfter(info)
+			if !is {
+				break
+			}
+		}
 	}
 	return is
 }

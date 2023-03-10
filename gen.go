@@ -58,8 +58,9 @@ func AddGenOne(handFunName, routerPath string, methods []string, thirdParty []Ge
 }
 
 func GetThirdParty(routerPath, thirdParty string) (*GenThirdParty, error) {
-	if _, ok := _genMap[fmt.Sprintf("%v-%v", routerPath, thirdParty)]; ok {
-		tmp := _genMap[routerPath]
+	key := fmt.Sprintf("%v-%v", routerPath, thirdParty)
+	if _, ok := _genMap[key]; ok {
+		tmp := _genMap[key]
 		return &GenThirdParty{
 			Name: tmp.Name,
 			Note: tmp.Note,

@@ -20,7 +20,7 @@ type _Base struct {
 	apiFun           NewAPIFunc
 	apiType          reflect.Type
 	outPath          string // output path.输出目录
-	beforeAfter      GinBeforeAfter
+	beforeAfter      []GinBeforeAfter
 	isOutDoc         bool
 	recoverErrorFunc RecoverErrorFunc
 }
@@ -84,7 +84,7 @@ func WithOutDoc(b bool) Option {
 // WithBeforeAfter set before and after call.设置对象调用前后执行中间件
 func WithBeforeAfter(beforeAfter GinBeforeAfter) Option {
 	return optionFunc(func(o *_Base) {
-		o.beforeAfter = beforeAfter
+		o.beforeAfter = append(o.beforeAfter, beforeAfter)
 	})
 }
 
