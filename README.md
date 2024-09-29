@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/xxjwxc/ginrpc/branch/master/graph/badge.svg)](https://codecov.io/gh/xxjwxc/ginrpc)
 [![GoDoc](https://godoc.org/github.com/xxjwxc/ginrpc?status.svg)](https://godoc.org/github.com/xxjwxc/ginrpc)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go) 
+<a href="https://hellogithub.com/repository/fbc519fa5a2e4e248eabd860a6f404ff" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=fbc519fa5a2e4e248eabd860a6f404ff&claim_uid=6IkmGoxiuN4LWFn&theme=small" alt="Featured｜HelloGitHub" /></a>
 
 # [中文文档](README_cn.md)
 
