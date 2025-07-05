@@ -20,6 +20,8 @@ type GinBeforeAfterInfo struct {
 	Req      interface{} // 调用前的请求参数
 	Resp     interface{} // 调用后的返回参数
 	Error    error       // 错误信息
+
+	Tag map[string]interface{} // 占位参数，可用于存储其他参数，前后连接可用
 	// Other options for implementations of the interface
 	// can be stored in a context
 	Context context.Context // 占位参数，可用于存储其他参数，前后连接可用
