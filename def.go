@@ -24,6 +24,13 @@ type NewAPIFunc func(*gin.Context) interface{}
 // RecoverErrorFunc recover 错误设置
 type RecoverErrorFunc func(interface{})
 
+// Exporter 可选 opt-in 接口:实现该接口的 controller 即使没有
+// 由 @Router 生成的路由表条目,也会在关闭 WithAutoRegister 时被注册。
+// 用于不方便写注解、但又希望显式暴露方法的场景(方法仍需签名匹配)。
+type Exporter interface {
+	GinrpcExporter()
+}
+
 // parmInfo 参数类型描述
 type parmInfo struct {
 	Pkg    string // 包名
@@ -37,6 +44,7 @@ type genComment struct {
 	Note           string // 注释
 	Methods        []string
 	ThirdPartyList []GenThirdParty // 第三方注解路由
+	Ignored        bool            // @Router - [-] 显式忽略标记,运行期 register 命中即跳过
 }
 
 type GenThirdParty struct {
@@ -68,14 +76,15 @@ var (
 
 	genTemp = `
 	package {{.PkgName}}
-	
+
 	import (
 		"github.com/xxjwxc/ginrpc"
 	)
-	
+
 	func init() {
 		ginrpc.SetVersion({{.Tm}})
-		{{range .List}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.GenComment.RouterPath}}", []string{ {{GetStringList .GenComment.Methods}} },[]ginrpc.GenThirdParty{ {{GetPartyList .GenComment.ThirdPartyList}} },{{GetNote .GenComment.Note}})
-		{{end}} }
+		{{range .List}}{{if .GenComment.Ignored}}ginrpc.AddGenIgnore("{{.HandFunName}}")
+		{{else}}ginrpc.AddGenOne("{{.HandFunName}}", "{{.GenComment.RouterPath}}", []string{ {{GetStringList .GenComment.Methods}} },[]ginrpc.GenThirdParty{ {{GetPartyList .GenComment.ThirdPartyList}} },{{GetNote .GenComment.Note}})
+		{{end}}{{end}} }
 	`
 )

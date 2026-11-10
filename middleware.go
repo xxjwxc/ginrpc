@@ -48,17 +48,19 @@ func (d *DefaultGinBeforeAfter) GinBefore(req *GinBeforeAfterInfo) bool {
 
 // GinAfter call之后调用
 func (d *DefaultGinBeforeAfter) GinAfter(req *GinBeforeAfterInfo) bool {
-	begin := (req.Context.Value(timeTrace{})).(time.Time)
-	now := time.Now()
-	mylog.Info(fmt.Sprintf("[middleware] call[%v] [%v]", req.FuncName, now.Sub(begin)))
+	if begin, ok := req.Context.Value(timeTrace{}).(time.Time); ok {
+		mylog.Info(fmt.Sprintf("[middleware] call[%v] [%v]", req.FuncName, time.Since(begin)))
+	}
 
 	msg := message.GetSuccessMsg()
 	if req.Error != nil {
 		msg = message.GetErrorMsg(message.InValidOp)
-		gerr := status.Convert(req.Error)
-		if gerr != nil {
-			msg.Code = int(gerr.Code())
-			msg.Error = gerr.Message()
+		// status.FromError 才能区分"是不是 grpc 错误":
+		// 历史上的 status.Convert(err) 对任何非 nil error 都返回非 nil,
+		// 普通业务 error 一律被当成 code=2(Unknown)。
+		if st, ok := status.FromError(req.Error); ok {
+			msg.Code = int(st.Code())
+			msg.Error = st.Message()
 		} else {
 			msg.Error = req.Error.Error()
 		}

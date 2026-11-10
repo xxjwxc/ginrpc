@@ -1,0 +1,9 @@
+# 测试/运行时生成的注解路由文件
+# (Register 会把路由表写到 <modFile>/routers/gen_router.go,
+#  跑 go test 就会在当前目录生成,不该进版本库)
+/routers/
+
+# 编译产物
+*.exe
+*.test
+*.out
