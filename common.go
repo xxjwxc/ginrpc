@@ -55,27 +55,76 @@ func (b *_Base) checkHandlerFunc(typ reflect.Type, isObj bool) (int, bool) { // 
 	return num, false
 }
 
+// checkHandlerFuncLoose 宽松匹配:只校验参数个数与"第一个参数像上下文"(指针/接口)。
+// 用途:显式标注(@Router)或 autoRegister/Exporter 的方法,不该仅仅因为
+// 上下文类型没推断准就被静默跳过;类型是否真的匹配交给调用期 ctxArg 判断。
+func (b *_Base) checkHandlerFuncLoose(typ reflect.Type, isObj bool) (int, bool) {
+	offset := 0
+	if isObj {
+		offset = 1
+	}
+	num := typ.NumIn() - offset
+	if num != 1 && num != 2 {
+		return num, false
+	}
+	if k := typ.In(offset).Kind(); k == reflect.Ptr || k == reflect.Interface {
+		return num, true
+	}
+	return num, false
+}
+
+// ctxArg 按 handler 声明的上下文类型生成入参。
+// gin.Context 直接透传;其余走 WithCtx 回调,并校验返回值能否赋给形参类型。
+// 类型确实对不上时返回错误,而不是 panic 或静默跳过。
+func (b *_Base) ctxArg(want reflect.Type, c *gin.Context) (reflect.Value, error) {
+	if want == reflect.TypeOf(&gin.Context{}) {
+		return reflect.ValueOf(c), nil
+	}
+	v := b.apiFun(c)
+	rv := reflect.ValueOf(v)
+	// 只接受可赋值(含接口实现),不做 Convert:结构相同的两个 context 类型
+	// 互相 ConvertibleTo,静默转换会把错误的上下文串进来。
+	if rv.IsValid() && rv.Type().AssignableTo(want) {
+		return rv, nil
+	}
+	got := "<nil>"
+	if rv.IsValid() {
+		got = rv.Type().String()
+	}
+	return reflect.Value{}, errors.Errorf("ginrpc: ctx type mismatch: method need %v, WithCtx returns %v; use ginrpc.WithCtxType to specify", want.String(), got)
+}
+
+// ctxArgOrFail ctxArg 的"出错即结束"封装:详情只进服务端日志,
+// 客户端拿到通用错误(不回显内部类型名)。
+func (b *_Base) ctxArgOrFail(c *gin.Context, want reflect.Type) (reflect.Value, bool) {
+	arg, err := b.ctxArg(want, c)
+	if err == nil {
+		return arg, true
+	}
+	mylog.ErrorString(err.Error())
+	b.writeResult(c, nil, errors.New("internal server error"))
+	return reflect.Value{}, false
+}
+
 // HandlerFunc Get and filter the parameters to be bound (object call type)
 func (b *_Base) handlerFuncObj(tvl, obj reflect.Value, methodName string) gin.HandlerFunc { // 获取并过滤要绑定的参数(obj 对象类型)
 	typ := tvl.Type()
 	if typ.NumIn() == 2 { // Parameter checking 参数检查
 		ctxType := typ.In(1)
 
-		// go-gin default method
-		apiFun := func(c *gin.Context) interface{} { return c }
-		if ctxType == b.apiType { // Customized context . 自定义的context
-			apiFun = b.apiFun
-		} else if !(ctxType == reflect.TypeOf(&gin.Context{})) {
-			panic("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " not support!")
-		}
-
+		// 上下文入参统一在调用期适配:gin.Context 与自定义 context 都走这里,
+		// 不再在注册期 panic,也不再因为类型没对上被静默跳过。
 		return func(c *gin.Context) {
 			defer func() {
 				if err := recover(); err != nil {
 					b.recoverHandler(c, err)
 				}
 			}()
-			tvl.Call([]reflect.Value{obj, reflect.ValueOf(apiFun(c))})
+			arg, ok := b.ctxArgOrFail(c, ctxType)
+			if !ok {
+				return
+			}
+			tvl.Call([]reflect.Value{obj, arg})
 		}
 	}
 
@@ -155,24 +204,9 @@ func (b *_Base) getCallFunc3(tvl reflect.Value) (func(*gin.Context), error) {
 
 	ctxType, reqType := typ.In(0), typ.In(1)
 
-	reqIsGinCtx := false
-	if ctxType == reflect.TypeOf(&gin.Context{}) {
-		reqIsGinCtx = true
-	}
-
-	// ctxType != reflect.TypeOf(gin.Context{}) &&
-	// ctxType != reflect.Indirect(reflect.ValueOf(b.iAPIType)).Type()
-	if !reqIsGinCtx && ctxType != b.apiType && !b.apiType.ConvertibleTo(ctxType) {
-		return nil, errors.New("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " first parm not support!")
-	}
-
 	reqIsValue := true
 	if reqType.Kind() == reflect.Ptr {
 		reqIsValue = false
-	}
-	apiFun := func(c *gin.Context) interface{} { return c }
-	if !reqIsGinCtx {
-		apiFun = b.apiFun
 	}
 
 	// hasReturn 注册期确定(NumOut 只可能是 0 或 2,上面已校验)。
@@ -198,7 +232,11 @@ func (b *_Base) getCallFunc3(tvl reflect.Value) (func(*gin.Context), error) {
 		if reqIsValue {
 			req = req.Elem()
 		}
-		returnValues := tvl.Call([]reflect.Value{reflect.ValueOf(apiFun(c)), req})
+		arg, ok := b.ctxArgOrFail(c, ctxType)
+		if !ok {
+			return
+		}
+		returnValues := tvl.Call([]reflect.Value{arg, req})
 		if !hasReturn { // 无返回值:handler 已自行写响应
 			return
 		}
@@ -234,24 +272,9 @@ func (b *_Base) getCallObj3(tvl, obj reflect.Value, methodName string) (func(*gi
 
 	ctxType, reqType := typ.In(1), typ.In(2)
 
-	reqIsGinCtx := false
-	if ctxType == reflect.TypeOf(&gin.Context{}) {
-		reqIsGinCtx = true
-	}
-
-	// ctxType != reflect.TypeOf(gin.Context{}) &&
-	// ctxType != reflect.Indirect(reflect.ValueOf(b.iAPIType)).Type()
-	if !reqIsGinCtx && ctxType != b.apiType && !b.apiType.ConvertibleTo(ctxType) {
-		return nil, errors.New("method " + runtime.FuncForPC(tvl.Pointer()).Name() + " first parm not support!")
-	}
-
 	reqIsValue := true
 	if reqType.Kind() == reflect.Ptr {
 		reqIsValue = false
-	}
-	apiFun := func(c *gin.Context) interface{} { return c }
-	if !reqIsGinCtx {
-		apiFun = b.apiFun
 	}
 
 	// 注册期计算并闭包捕获,避免每请求 fmt.Sprintf / 反射 / 无谓分配:
@@ -293,7 +316,11 @@ func (b *_Base) getCallObj3(tvl, obj reflect.Value, methodName string) (func(*gi
 			}
 		}
 
-		returnValues := tvl.Call([]reflect.Value{obj, reflect.ValueOf(apiFun(c)), req})
+		arg, ok := b.ctxArgOrFail(c, ctxType)
+		if !ok {
+			return
+		}
+		returnValues := tvl.Call([]reflect.Value{obj, arg, req})
 		if !hasReturn { // 无返回值:handler 自行写响应;中间件仅作观测
 			if hasBA {
 				bainfo.Resp, bainfo.Error = nil, nil
@@ -612,9 +639,22 @@ func (b *_Base) tryGenRegister(router gin.IRoutes, cList ...interface{}) bool {
 				method := refTyp.Method(m)
 
 				num, _b := b.checkHandlerFunc(method.Type /*.Interface()*/, true)
+				loose := false
+				if !_b { // 上下文类型没推断准:不再静默丢弃,按宽松规则继续出文档/路由表
+					num, _b = b.checkHandlerFuncLoose(method.Type, true)
+					loose = _b
+				}
 				if _b {
-					if fp, ok := funMp[method.Name]; ok {
+					fp, ok := funMp[method.Name]
+					if !ok { // AST 里找不到方法体:文档/路由表会缺条目,必须留痕
+						mylog.ErrorString(fmt.Sprintf("ginrpc: %v.%v 未在源码中找到,跳过文档与路由表生成", objName, method.Name))
+					}
+					if ok {
 						gcs, req, resp := b.parserComments(fp.AstFunc, objName, method.Name, fp.Imports, objPkg, num)
+						if loose && len(gcs) > 0 { // 真正会进文档/路由表时才告警
+							mylog.ErrorString(fmt.Sprintf("ginrpc: %v.%v 的上下文类型 %v 与 apiType %v 不匹配,已按宽松模式生成;可用 ginrpc.WithCtxType 显式指定",
+								objName, method.Name, method.Type.In(1), b.apiType))
+						}
 						if b.isOutDoc { // output doc
 							// now := time.Now()
 							// fmt.Println(objName + "." + method.Name)
@@ -709,9 +749,6 @@ func (b *_Base) register(router gin.IRoutes, cList ...interface{}) bool {
 		for m := 0; m < refTyp.NumMethod(); m++ {
 			method := refTyp.Method(m)
 			num, _b := b.checkHandlerFunc(method.Type /*.Interface()*/, true)
-			if !_b {
-				continue
-			}
 
 			key := objName + "." + method.Name
 			routes, inTable := mp[key]
@@ -728,6 +765,22 @@ func (b *_Base) register(router gin.IRoutes, cList ...interface{}) bool {
 				if ignored {
 					continue
 				}
+			}
+
+			// 上下文类型没推断准不再静默跳过:显式标注(@Router)或
+			// autoRegister/Exporter 的方法按宽松规则继续注册,
+			// 调用期由 ctxArg 适配并给出明确错误。
+			if !_b {
+				if !inTable && !b.autoRegister && !exporter {
+					continue
+				}
+				var ok bool
+				num, ok = b.checkHandlerFuncLoose(method.Type, true)
+				if !ok {
+					continue
+				}
+				mylog.ErrorString(fmt.Sprintf("ginrpc: register %v 的上下文类型 %v 与 apiType %v 不匹配,按宽松模式注册;可用 ginrpc.WithCtxType 显式指定",
+					key, method.Type.In(1), b.apiType))
 			}
 
 			if inTable {

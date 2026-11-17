@@ -24,6 +24,7 @@ type _Base struct {
 	isDev              bool // if is development(默认 false,仅 WithDebug(true) 开启)
 	apiFun             NewAPIFunc
 	apiType            reflect.Type
+	apiTypeExplicit    bool // WithCtxType 显式指定,优先于所有自动推断
 	outPath            string // output path.输出目录
 	beforeAfter        []GinBeforeAfter
 	isOutDoc           bool
@@ -80,8 +81,9 @@ func WithAutoRegister(b bool) Option {
 	})
 }
 
-// WithCtxType 显式指定自定义上下文类型。Model() 不再在构造期调用用户回调,
-// 默认上下文推断为 *api.Context;若 WithCtx 返回其它类型,用本 Option 指定。
+// WithCtxType 显式指定自定义上下文类型。
+// 不指定时 Model() 会从 WithCtx 回调自动推断(静态返回类型 -> 安全探测),
+// 推断失败才退回默认 *api.Context;显式指定后不再被自动推断覆盖。
 func WithCtxType(t reflect.Type) Option {
 	return optionFunc(func(o *_Base) {
 		if t == nil {
@@ -91,6 +93,7 @@ func WithCtxType(t reflect.Type) Option {
 			panic("need pointer")
 		}
 		o.apiType = t
+		o.apiTypeExplicit = true
 	})
 }
 
@@ -189,17 +192,55 @@ func (b *_Base) Model(middleware NewAPIFunc) *_Base {
 
 	b.apiFun = middleware // save callback
 
-	// 不再通过 middleware(&gin.Context{}) 在构造期探测类型:
-	// 空上下文会让访问 c.Request 的自定义 apiFun 直接 panic,
-	// 且 NewAPIFunc 的静态返回类型是 interface{},反射也看不到具体类型。
-	// 默认自定义上下文推断为 *api.Context(覆盖 api.NewCtx 等绝大多数用法);
-	// 若使用其它类型,请用 WithCtxType 显式指定(避免调用用户回调)。
-	// 已由 WithCtxType 指定过则保留。
+	// 上下文类型推断(优先级由高到低):
+	// 1. WithCtxType 显式指定,不再被覆盖;
+	// 2. 回调的静态返回类型(不是 interface 时)直接采用,无任何副作用;
+	// 3. 返回类型是 interface{} 时安全探测一次(带 recover 调用空上下文),
+	//    取实际返回值的具体类型;
+	// 4. 仍然推断不出来才退回默认 *api.Context。
+	// 历史实现直接退回默认,导致自定义上下文的 handler 被静默跳过
+	// (路由不注册、接口文档不生成),这里改为尽最大努力推断。
+	if !b.apiTypeExplicit {
+		if t := detectCtxType(middleware); t != nil {
+			b.apiType = t
+		}
+	}
 	if b.apiType == nil {
 		b.apiType = reflect.TypeOf(&api.Context{})
 	}
 
 	return b
+}
+
+// detectCtxType 推断 NewAPIFunc 构造出来的上下文类型。
+// 先看静态签名(无副作用);只有返回 interface{} 这类看不出来时才实际调用一次,
+// 并用 recover 兜住"访问空上下文里的 c.Request"导致的 panic,不让推断失败影响启动。
+func detectCtxType(middleware NewAPIFunc) (t reflect.Type) {
+	ft := reflect.TypeOf(middleware)
+	if ft == nil || ft.Kind() != reflect.Func || ft.NumOut() != 1 {
+		return nil
+	}
+
+	// 静态签名就能看出具体类型(如 func(*gin.Context) *api.Context)
+	if out := ft.Out(0); out.Kind() != reflect.Interface {
+		return out
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			t = nil // 探测失败:交给调用方退回默认类型
+		}
+	}()
+
+	v := middleware(&gin.Context{})
+	if v == nil {
+		return nil
+	}
+	rt := reflect.TypeOf(v)
+	if rt.Kind() != reflect.Ptr { // 上下文只能是指针类型
+		return nil
+	}
+	return rt
 }
 
 // Register Registered by struct object,[prepath + bojname.]
@@ -316,7 +357,9 @@ func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取
 		}
 
 		// Customized context . 自定义的context
-		if ctxType == b.apiType {
+		// 只要形参是指针/接口就按上下文处理,不再因为类型没对上在注册期 panic;
+		// 真正不匹配时由 ctxArgOrFail 在调用期给出明确错误。
+		if ctxType.Kind() == reflect.Ptr || ctxType.Kind() == reflect.Interface {
 			method := reflect.ValueOf(handlerFunc)
 			return func(c *gin.Context) {
 				defer func() {
@@ -324,11 +367,15 @@ func (b *_Base) HandlerFunc(handlerFunc interface{}) gin.HandlerFunc { // 获取
 						b.recoverHandler(c, err)
 					}
 				}()
-				method.Call([]reflect.Value{reflect.ValueOf(b.apiFun(c))})
+				arg, ok := b.ctxArgOrFail(c, ctxType)
+				if !ok {
+					return
+				}
+				method.Call([]reflect.Value{arg})
 			}
 		}
 
-		panic("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " not support!")
+		panic("method " + runtime.FuncForPC(reflect.ValueOf(handlerFunc).Pointer()).Name() + " first parm not support!")
 	}
 
 	// Custom context type with request parameters .自定义的context类型,带request 请求参数
