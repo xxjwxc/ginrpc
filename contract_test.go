@@ -37,7 +37,8 @@ func postJSON(router *gin.Engine, path, body string) *httptest.ResponseRecorder 
 	return w
 }
 
-// TestContractPostBinding:POST 正常 / 非法 JSON 400 / validator 失败 400。
+// TestContractPostBinding:POST 正常 / 非法 JSON / validator 失败均返回 200 + JSON,
+// 错误由 body 的 state:false 表达(旧版接口协议)。
 // 覆盖 P0-1(unmarshal 绑定错误不再被 mapJson 覆盖)。
 func TestContractPostBinding(t *testing.T) {
 	router, base := contractRouter()
@@ -58,16 +59,22 @@ func TestContractPostBinding(t *testing.T) {
 		t.Fatalf("valid POST: unexpected body %s", w.Body.String())
 	}
 
-	// 非法 JSON:历史上这里会以零值对象继续执行并返回 200
+	// 非法 JSON:返回参数错误体,状态码统一 200
 	w = postJSON(router, "/echo", `{not-json`)
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("invalid JSON: got %d want 400, body=%s", w.Code, w.Body.String())
+	if w.Code != http.StatusOK {
+		t.Fatalf("invalid JSON: got %d want 200, body=%s", w.Code, w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), `"state":false`) || !strings.Contains(w.Body.String(), "req param") {
+		t.Fatalf("invalid JSON: 错误体缺失: %s", w.Body.String())
 	}
 
 	// validator 失败(缺少 required 的 name)
 	w = postJSON(router, "/echo", `{"token":"t"}`)
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("validator failure: got %d want 400, body=%s", w.Code, w.Body.String())
+	if w.Code != http.StatusOK {
+		t.Fatalf("validator failure: got %d want 200, body=%s", w.Code, w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), `"state":false`) || !strings.Contains(w.Body.String(), "Name:required") {
+		t.Fatalf("validator failure: 错误体缺失: %s", w.Body.String())
 	}
 	// 校验错误不能回显字段值(err.Value())
 	if strings.Contains(w.Body.String(), "but[") {
@@ -97,16 +104,16 @@ func TestContractGetPatch(t *testing.T) {
 		t.Fatalf("GET patch failed: %s", w.Body.String())
 	}
 
-	// 补刀后必须重新校验:缺少 required 字段不能被当成 200
+	// 补刀后必须重新校验:缺少 required 字段必须返回错误体(200 + state:false)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/echo?token=tk", nil))
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("GET missing required: got %d want 400, body=%s", w.Code, w.Body.String())
+	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), `"state":false`) {
+		t.Fatalf("GET missing required: got %d want 200+错误体, body=%s", w.Code, w.Body.String())
 	}
 }
 
-// TestContractHandlerError:函数式 handler 返回 error 时,框架统一写非 200,
-// 并把 grpc code 映射为对应 HTTP 状态。覆盖 P0-2(writeResult)。
+// TestContractHandlerError:函数式 handler 返回 error 时,框架统一写 200 + JSON 错误体,
+// grpc code/消息保留在 body 的 code/error 中。覆盖 P0-2(writeResult)。
 func TestContractHandlerError(t *testing.T) {
 	router, base := contractRouter()
 	router.POST("/bizerr", base.HandlerFunc(func(c *gin.Context, req contractReq) (*contractReq, error) {
@@ -129,20 +136,24 @@ func TestContractHandlerError(t *testing.T) {
 	}))
 
 	cases := []struct {
-		path string
-		want int
+		path    string
+		wantErr string
 	}{
-		{"/bizerr", http.StatusBadRequest},
-		{"/badarg", http.StatusBadRequest},
-		{"/notfound", http.StatusNotFound},
-		{"/unauth", http.StatusUnauthorized},
-		{"/denied", http.StatusForbidden},
-		{"/internal", http.StatusInternalServerError},
+		{"/bizerr", "biz failed"},
+		{"/badarg", "bad arg"},
+		{"/notfound", "no such user"},
+		{"/unauth", "login please"},
+		{"/denied", "denied"},
+		{"/internal", "db down"},
 	}
 	for _, tc := range cases {
 		w := postJSON(router, tc.path, `{"name":"x"}`)
-		if w.Code != tc.want {
-			t.Fatalf("%s: got %d want %d, body=%s", tc.path, w.Code, tc.want, w.Body.String())
+		if w.Code != http.StatusOK {
+			t.Fatalf("%s: got %d want 200, body=%s", tc.path, w.Code, w.Body.String())
+		}
+		body := w.Body.String()
+		if !strings.Contains(body, `"state":false`) || !strings.Contains(body, tc.wantErr) {
+			t.Fatalf("%s: 错误体缺失(want err %q): body=%s", tc.path, tc.wantErr, body)
 		}
 	}
 }
@@ -154,7 +165,7 @@ func (o *contractObj) Fail(c *gin.Context, req contractReq) (*contractReq, error
 	return nil, status.Error(codes.PermissionDenied, "denied")
 }
 
-// TestContractObjectError:对象式 handler 返回 error 也必须写非 200(两条路径协议一致)。
+// TestContractObjectError:对象式 handler 返回 error 也写 200 + JSON 错误体(两条路径协议一致)。
 func TestContractObjectError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -173,11 +184,12 @@ func TestContractObjectError(t *testing.T) {
 		t.Fatal("object handler was not registered")
 	}
 	w := postJSON(router, target, `{"name":"x"}`)
-	if w.Code == http.StatusOK {
-		t.Fatalf("object handler error must not be 200, got %d body=%s", w.Code, w.Body.String())
+	if w.Code != http.StatusOK {
+		t.Fatalf("object handler error: got %d want 200, body=%s", w.Code, w.Body.String())
 	}
-	if w.Code != http.StatusForbidden {
-		t.Fatalf("object handler error: got %d want 403, body=%s", w.Code, w.Body.String())
+	body := w.Body.String()
+	if !strings.Contains(body, `"state":false`) || !strings.Contains(body, "denied") {
+		t.Fatalf("object handler error body: %s", body)
 	}
 }
 

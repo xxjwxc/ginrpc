@@ -98,7 +98,7 @@ func TestCustomCtxNotSkipped(t *testing.T) {
 }
 
 // TestCtxMismatchNotSkipped 上下文类型确实对不上时:路由照常注册,
-// 调用期返回明确错误(不再静默跳过,也不再注册期 panic)。
+// 调用期返回明确错误体(200 + JSON,不再静默跳过,也不再注册期 panic)。
 func TestCtxMismatchNotSkipped(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
@@ -115,7 +115,7 @@ func TestCtxMismatchNotSkipped(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, r.Routes()[0].Path, nil)
 	r.ServeHTTP(w, req)
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("期望 400,实际 %d body=%q", w.Code, w.Body.String())
+	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), `"state":false`) {
+		t.Fatalf("期望 200 + 错误体,实际 %d body=%q", w.Code, w.Body.String())
 	}
 }

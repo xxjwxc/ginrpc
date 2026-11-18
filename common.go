@@ -22,7 +22,6 @@ import (
 	"github.com/xxjwxc/public/myast"
 	"github.com/xxjwxc/public/mybigcamel"
 	"github.com/xxjwxc/public/mydoc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -311,7 +310,7 @@ func (b *_Base) getCallObj3(tvl, obj reflect.Value, methodName string) (func(*gi
 			var is bool
 			bainfo, is = b.beforCall(c, obj, req.Interface(), funcName)
 			if !is { // GinBefore 显式拒绝
-				c.JSON(http.StatusBadRequest, bainfo.Resp)
+				c.JSON(http.StatusOK, bainfo.Resp) // 错误也走 200 + JSON 协议,由 body 表达
 				return
 			}
 		}
@@ -354,6 +353,7 @@ func (b *_Base) getCallObj3(tvl, obj reflect.Value, methodName string) (func(*gi
 // handErrorString 把绑定/校验错误写给客户端。
 // 只输出字段名 / Tag() / Param(),绝不输出 err.Value():
 // 失败字段可能是 password / access_token / 原始请求内容等敏感值。
+// 状态码固定 200:调用方按旧协议统一解析 JSON(由 body 的 state 表达成败)。
 func (b *_Base) handErrorString(c *gin.Context, err error) {
 	var fields []string
 	if ve, ok := err.(validator.ValidationErrors); ok {
@@ -373,7 +373,7 @@ func (b *_Base) handErrorString(c *gin.Context, err error) {
 
 	msg := message.GetErrorMsg(message.ParameterInvalid)
 	msg.Error = fmt.Sprintf("req param : %v", strings.Join(fields, ";"))
-	c.JSON(http.StatusBadRequest, msg)
+	c.JSON(http.StatusOK, msg)
 }
 
 // unmarshal 绑定并校验请求参数。
@@ -401,7 +401,9 @@ func (b *_Base) unmarshal(c *gin.Context, v interface{}) error {
 	return nil
 }
 
-// writeResult 统一写回响应:框架始终负责处理 error,成功才 200。
+// writeResult 统一写回响应:框架始终负责处理 error。
+// 成功与错误均返回 HTTP 200 + JSON,由 body 的 state/code 区分
+// (旧版接口协议:调用方对 4xx 不解析 body,统一 200 才能拿到错误 JSON)。
 // GinAfter 等中间件只负责观测/改写 resp,不参与"是否输出错误"的决策,
 // 函数式与对象式两条 handler 路径都必须经过这里,保证协议一致。
 func (b *_Base) writeResult(c *gin.Context, resp interface{}, err error) {
@@ -416,29 +418,10 @@ func (b *_Base) writeResult(c *gin.Context, resp interface{}, err error) {
 		} else {
 			msg.Error = err.Error()
 		}
-		c.JSON(grpcCodeToHTTP(err), msg)
+		c.JSON(http.StatusOK, msg)
 		return
 	}
 	c.JSON(http.StatusOK, resp)
-}
-
-// grpcCodeToHTTP 把 grpc 状态码映射为 HTTP 状态码,其余一律按 400 处理。
-func grpcCodeToHTTP(err error) int {
-	if st, ok := status.FromError(err); ok {
-		switch st.Code() {
-		case codes.InvalidArgument:
-			return http.StatusBadRequest
-		case codes.NotFound:
-			return http.StatusNotFound
-		case codes.Unauthenticated:
-			return http.StatusUnauthorized
-		case codes.PermissionDenied:
-			return http.StatusForbidden
-		case codes.Internal:
-			return http.StatusInternalServerError
-		}
-	}
-	return http.StatusBadRequest
 }
 
 func (b *_Base) parserStruct(req, resp *parmInfo, astPkg *ast.Package, modPkg, modFile string) (r, p *mydoc.StructInfo) {
